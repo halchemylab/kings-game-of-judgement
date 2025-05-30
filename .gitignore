@@ -7,6 +7,7 @@ __pycache__/
 # Ignore environment variable files
 .env
 .env.*
+past_cases/
 
 # Ignore OS files
 .DS_Store
