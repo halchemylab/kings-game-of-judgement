@@ -11,6 +11,140 @@ st.set_page_config(
     layout="wide"
 )
 
+# --- Custom CSS for Legible, Modern Theme ---
+st.markdown(
+    """
+    <style>
+    html, body, [class*='css']  {
+        font-family: 'Segoe UI', 'Arial', sans-serif !important;
+        background: #f6f8fa !important;
+        color: #22272e !important;
+    }
+    .main {
+        background: #fff !important;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px 0 rgba(60, 60, 60, 0.07);
+        padding: 2rem 2.5rem 2rem 2.5rem;
+        margin-top: 2rem;
+    }
+    .stButton>button {
+        background: linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%);
+        color: #fff;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.08rem;
+        border: none;
+        transition: 0.2s;
+        box-shadow: 0 2px 8px #6dd5ed33;
+    }
+    .stButton>button:active {
+        background: #2193b0;
+    }
+    /* Rainbow effect for critical buttons */
+    .rainbow-btn {
+        background: linear-gradient(90deg, #ff5858, #f09819, #fffa65, #43e97b, #38f9d7, #2193b0, #ee0979, #ff5858);
+        background-size: 300% 300%;
+        color: #fff !important;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 2px 12px #fffa6533;
+        transition: background-position 0.5s, color 0.2s;
+    }
+    .rainbow-btn:hover {
+        background-position: 100% 0;
+        color: #22272e !important;
+        box-shadow: 0 4px 24px #fffa6533;
+    }
+    .royal-banner {
+        background: #2193b0;
+        color: #fff;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        font-size: 2rem;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        text-align: center;
+        font-weight: 700;
+        letter-spacing: 1px;
+        box-shadow: 0 2px 8px #2193b033;
+    }
+    .royal-card {
+        background: #f6f8fa;
+        border-radius: 10px;
+        padding: 1.2rem 1.2rem 1rem 1.2rem;
+        margin-bottom: 1.2rem;
+        box-shadow: 0 2px 8px #2193b022;
+        border: 1px solid #e3e8ee;
+    }
+    .royal-divider {
+        border: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%);
+        margin: 1.2rem 0 1.2rem 0;
+    }
+    .royal-label {
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        font-size: 1.08rem;
+        color: #2193b0;
+        font-weight: 600;
+    }
+    .stTextInput>div>input, .stTextArea>div>textarea {
+        background: #f6f8fa;
+        border: 1.5px solid #6dd5ed88;
+        border-radius: 8px;
+        font-size: 1.08rem;
+        color: #22272e;
+    }
+    .stTextInput>div>input:focus, .stTextArea>div>textarea:focus {
+        border: 2px solid #2193b0;
+        outline: none;
+    }
+    /* Sidebar redesign */
+    section[data-testid="stSidebar"] {
+        background: #1a2a36;
+        border-right: 2px solid #2193b0;
+        box-shadow: 2px 0 12px #2193b022;
+        padding-top: 1.5rem;
+    }
+    .sidebar-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #6dd5ed;
+        margin-bottom: 0.7rem;
+        text-align: center;
+    }
+    .sidebar-card {
+        background: #223344;
+        border-radius: 8px;
+        padding: 1rem 1rem 0.7rem 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px #2193b022;
+        border: 1px solid #2193b0;
+        font-size: 1.05rem;
+        color: #fff;
+    }
+    .sidebar-critical {
+        color: #ee0979;
+        font-weight: bold;
+        margin-top: 1.2rem;
+        text-align: center;
+    }
+    /* Text area background for better contrast */
+    .stTextArea>div>textarea {
+        background: #223344 !important;
+        color: #fff !important;
+        border: 1.5px solid #6dd5ed88;
+    }
+    .stTextArea>div>textarea:focus {
+        border: 2px solid #2193b0;
+        outline: none;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # --- Session State Initialization ---
 def init_session_state():
     if "player_name" not in st.session_state:
@@ -48,7 +182,7 @@ def handle_llm_response(response_text, success_callback, error_message_prefix=""
 # --- Game UI and Logic ---
 
 def display_welcome():
-    st.title("👑 Welcome to The King's Game of Judgement! 👑")
+    st.markdown('<div class="royal-banner">👑 Welcome to <b>The King\'s Game of Judgement!</b> 👑</div>', unsafe_allow_html=True)
 
     if not st.session_state.api_key_valid:
         st.error(
@@ -56,62 +190,56 @@ def display_welcome():
             "Please ensure your `OPENAI_API_KEY` is set in a `.env` file "
             "in the root directory of the application and that you have installed the `python-dotenv` package."
         )
-        st.markdown("Your `.env` file should look like this:\n```\nOPENAI_API_KEY=\"your_actual_api_key_here\"\n```")
-        st.stop() # Halt execution if API key is not set up
+        st.markdown("""Your `.env` file should look like this:\n```
+OPENAI_API_KEY=\"your_actual_api_key_here\"\n```
+""")
+        st.stop()
 
-    st.markdown("""
-    Hark, noble one! You are about to embark on a journey of wisdom and discernment.
-    As a venerable Judge in this kingdom, your keen intellect and balanced perspective
-    will be called upon to resolve complex disputes.
-    """)
-    
-    name_input = st.text_input("Pray, tell us your esteemed name to begin:", key="player_name_input_key") # Changed key to avoid conflict
-    
-    if st.button("Begin My Tenure as Judge"):
+    st.markdown(
+        '<div class="royal-card">'
+        '<span class="royal-label">Hark, noble one!</span><br>'
+        'You are about to embark on a journey of wisdom and discernment.<br>'
+        'As a venerable Judge in this kingdom, your keen intellect and balanced perspective '
+        'will be called upon to resolve complex disputes.'
+        '</div>', unsafe_allow_html=True)
+
+    name_input = st.text_input("Pray, tell us your esteemed name to begin:", key="player_name_input_key")
+
+    st.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
+
+    if st.button("✨ Begin My Tenure as Judge", key="begin_judge_btn", help="Start the game!"):
         if name_input:
             st.session_state.player_name = name_input.strip()
             st.session_state.judge_name = f"Judge {st.session_state.player_name}"
             st.session_state.game_stage = "scenario_presented"
             st.session_state.current_case_id = generate_case_id()
-            
             with st.spinner(f"Summoning a new case for {st.session_state.judge_name}... This may take a moment."):
                 scenario_text = generate_scenario_with_llm(st.session_state.player_name)
-            
             def set_scenario(text):
                 st.session_state.current_scenario = text
-            
             if handle_llm_response(scenario_text, set_scenario, "Failed to generate scenario: "):
                 st.rerun()
             else:
-                # Error handled by handle_llm_response, user can try again or fix API key
-                st.session_state.game_stage = "welcome" # Stay on welcome page if error
+                st.session_state.game_stage = "welcome"
         else:
             st.warning("A Judge must have a name! Please enter yours.")
 
+
 def display_scenario_and_task():
-    st.header(f"A New Case Awaits, {st.session_state.judge_name}")
-    
+    st.markdown('<div class="royal-banner">A New Case Awaits, {}</div>'.format(st.session_state.judge_name), unsafe_allow_html=True)
     if st.session_state.current_scenario:
-        st.markdown("---")
-        st.subheader("📜 The Case Before You:")
-        st.markdown(st.session_state.current_scenario)
-        st.markdown("---")
-
-        st.subheader(f"Your Task, {st.session_state.judge_name}:")
-        st.markdown(f"""
-        Considering the facts, the written rules (if any were implied or provided in the scenario), 
-        and the 'human values' and 'normative choices' at play:
-
-        *   Who should [the disputed object/resolution] go to / What should be the outcome?
-        *   What is your reasoning?
-        *   What values are you prioritizing in your decision?
-
-        Take your time, my king! I await your wise judgment. 👑📝
-        """)
-
-        judgment_text = st.text_area("Enter your judgment here:", height=300, key="judgment_input_key") # Changed key
-
-        if st.button("⚖️ Submit Your Judgment"):
+        st.markdown('<div class="royal-card"><span class="royal-label">📜 The Case Before You:</span><br>{}</div>'.format(st.session_state.current_scenario), unsafe_allow_html=True)
+        st.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
+        st.markdown('<div class="royal-card"><span class="royal-label">Your Task, {}</span><br>'.format(st.session_state.judge_name) +
+            "Considering the facts, the written rules (if any were implied or provided in the scenario), "
+            "and the 'human values' and 'normative choices' at play:<br><ul>"
+            "<li>Who should [the disputed object/resolution] go to / What should be the outcome?</li>"
+            "<li>What is your reasoning?</li>"
+            "<li>What values are you prioritizing in your decision?</li>"
+            "</ul>Take your time, my king! I await your wise judgment. 👑📝</div>", unsafe_allow_html=True)
+        judgment_text = st.text_area("Enter your judgment here:", height=200, key="judgment_input_key")
+        st.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
+        if st.button("⚖️ Submit Your Judgment", key="submit_judgment_btn", help="Submit your decision!", use_container_width=True):
             if judgment_text.strip():
                 st.session_state.player_judgment = judgment_text.strip()
                 st.session_state.game_stage = "judgment_submitted"
@@ -119,45 +247,33 @@ def display_scenario_and_task():
             else:
                 st.warning("An empty scroll offers no wisdom. Please pen your judgment.")
     else:
-        # This case should ideally be caught earlier during scenario generation
         st.error("Apologies, the scenario is missing. Let's try to fetch a new one.")
-        if st.button("Fetch New Case"):
-            st.session_state.game_stage = "welcome" # Reset to re-trigger name and scenario gen
-            st.session_state.player_name = "" # Force re-entry or re-confirmation
+        if st.button("Fetch New Case", key="fetch_new_case_btn"):
+            st.session_state.game_stage = "welcome"
+            st.session_state.player_name = ""
             st.rerun()
 
 
 def display_ai_analysis():
-    st.header(f"The Royal Advisor's Counsel for {st.session_state.judge_name}")
-    
-    if st.session_state.ai_analysis is None: # Analysis not yet generated
+    st.markdown('<div class="royal-banner">The Royal Advisor\'s Counsel for {}</div>'.format(st.session_state.judge_name), unsafe_allow_html=True)
+    if st.session_state.ai_analysis is None:
         with st.spinner(f"The Royal Advisor is diligently reviewing your judgment, {st.session_state.judge_name}... This may take a moment."):
             analysis_result = analyze_judgment_with_llm(
                 st.session_state.player_judgment,
                 st.session_state.current_scenario,
                 st.session_state.player_name
             )
-        
         def set_analysis(text):
             st.session_state.ai_analysis = text
-
         if not handle_llm_response(analysis_result, set_analysis, "Failed to get Advisor's analysis: "):
-            # Error displayed by handle_llm_response. Allow user to try again or proceed.
-            # Optionally, could add a button here to "Try generating analysis again"
-            if st.button("Try Analysis Again"):
-                 st.session_state.ai_analysis = None # Reset to trigger re-analysis
-                 st.rerun()
-            return # Stop further processing if analysis failed
-
+            if st.button("Try Analysis Again", key="try_analysis_btn"):
+                st.session_state.ai_analysis = None
+                st.rerun()
+            return
     if st.session_state.ai_analysis:
-        st.markdown("---")
-        st.subheader("🧐 Advisor's Analysis:")
-        st.markdown(st.session_state.ai_analysis)
-        st.markdown("---")
-
-        # Save the case
+        st.markdown('<div class="royal-card"><span class="royal-label">🧐 Advisor\'s Analysis:</span><br>{}</div>'.format(st.session_state.ai_analysis), unsafe_allow_html=True)
+        st.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
         if st.session_state.current_case_id and st.session_state.current_scenario and st.session_state.player_judgment and st.session_state.ai_analysis:
-            # Ensure analysis is not an error message before saving
             if not st.session_state.ai_analysis.startswith("Error:"):
                 if save_case(
                     st.session_state.current_case_id,
@@ -171,33 +287,13 @@ def display_ai_analysis():
                     st.error("There was an issue archiving this case.")
             else:
                 st.info("Case not saved as the AI analysis encountered an error.")
-        
-        if st.button("Hear Another Case 📜"):
-            # Reset for a new case
-            st.session_state.game_stage = "scenario_presented"
-            st.session_state.current_scenario = None # Will be fetched
-            st.session_state.player_judgment = ""
-            st.session_state.ai_analysis = None
-            st.session_state.current_case_id = generate_case_id()
-            
-            with st.spinner(f"Summoning a new challenge for {st.session_state.judge_name}... This may take a moment."):
-                scenario_text = generate_scenario_with_llm(st.session_state.player_name)
-            
-            def set_scenario(text):
-                st.session_state.current_scenario = text
-
-            if handle_llm_response(scenario_text, set_scenario, "Failed to generate new scenario: "):
-                 st.rerun()
-            else:
-                # Error handled, stay on current page or revert to welcome
-                st.session_state.game_stage = "welcome" # Revert to welcome if new scenario fails critically
-                st.rerun()
-
+        # Rainbow button for critical action
+        rainbow_btn_html = '''<button class="rainbow-btn" onclick="window.location.reload()" style="width:100%;margin-top:1.2rem;padding:0.7rem 0;font-size:1.1rem;">📜 Hear Another Case</button>'''
+        st.markdown(rainbow_btn_html, unsafe_allow_html=True)
     else:
-        # This state should be covered by the loading spinner and handle_llm_response logic
         st.error("The Advisor seems to be indisposed. Unable to retrieve analysis at this time.")
-        if st.button("Try Analysis Again"):
-            st.session_state.ai_analysis = None # Reset to trigger re-analysis
+        if st.button("Try Analysis Again", key="try_analysis_btn2"):
+            st.session_state.ai_analysis = None
             st.rerun()
 
 
@@ -226,13 +322,15 @@ else:
     st.rerun()
 
 # --- Sidebar ---
-st.sidebar.header("Game Information")
+st.sidebar.markdown('<div class="sidebar-title">Game Panel</div>', unsafe_allow_html=True)
 if st.session_state.player_name:
-    st.sidebar.write(f"Current Judge: {st.session_state.judge_name}")
+    st.sidebar.markdown(f'<div class="sidebar-card">Judge: <b>{st.session_state.judge_name}</b></div>', unsafe_allow_html=True)
+    st.sidebar.markdown(f'<div class="sidebar-card">Current Stage: <b>{st.session_state.game_stage.replace("_", " ").title()}</b></div>', unsafe_allow_html=True)
 else:
-    st.sidebar.write("Awaiting Judge's arrival.")
-
-st.sidebar.markdown("---")
-st.sidebar.caption("The King's Game of Judgement v0.2 (OpenAI Powered)")
+    st.sidebar.markdown('<div class="sidebar-card">Awaiting Judge\'s arrival.</div>', unsafe_allow_html=True)
+st.sidebar.markdown('<div class="sidebar-card">Cases Resolved: <b>{}</b></div>'.format(len([f for f in os.listdir('past_cases') if f.startswith('case_')]) if os.path.exists('past_cases') else 0), unsafe_allow_html=True)
+st.sidebar.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
+st.sidebar.markdown('<div class="sidebar-card">How to Play:<br><ul><li>Enter your name to begin.</li><li>Read the case and submit your judgment.</li><li>Review the Royal Advisor\'s analysis.</li><li>Try as many cases as you wish!</li></ul></div>', unsafe_allow_html=True)
+st.sidebar.markdown('<div class="sidebar-card">Powered by <b>OpenAI</b></div>', unsafe_allow_html=True)
 if not st.session_state.api_key_valid:
-    st.sidebar.error("API Key Missing!")
+    st.sidebar.markdown('<div class="sidebar-critical">API Key Missing!</div>', unsafe_allow_html=True)
