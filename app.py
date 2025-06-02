@@ -1,6 +1,7 @@
 # app.py
 import streamlit as st
 import os # For joining path in save_case success message
+import time
 from llm_integration import generate_scenario_with_llm, analyze_judgment_with_llm, OPENAI_API_KEY
 from file_utils import save_case, generate_case_id
 
@@ -226,6 +227,11 @@ OPENAI_API_KEY=\"your_actual_api_key_here\"\n```
 
 
 def display_scenario_and_task():
+    # Animated transition: Balloons when a new case is presented
+    if st.session_state.get('show_balloons', False):
+        st.balloons()
+        time.sleep(1.2)
+        st.session_state.show_balloons = False
     st.markdown('<div class="royal-banner">A New Case Awaits, {}</div>'.format(st.session_state.judge_name), unsafe_allow_html=True)
     if st.session_state.current_scenario:
         st.markdown('<div class="royal-card"><span class="royal-label">📜 The Case Before You:</span><br>{}</div>'.format(st.session_state.current_scenario), unsafe_allow_html=True)
@@ -255,6 +261,11 @@ def display_scenario_and_task():
 
 
 def display_ai_analysis():
+    # Animated transition: Snow/confetti when analysis is shown
+    if st.session_state.get('show_snow', False):
+        st.snow()
+        time.sleep(1.2)
+        st.session_state.show_snow = False
     st.markdown('<div class="royal-banner">The Royal Advisor\'s Counsel for {}</div>'.format(st.session_state.judge_name), unsafe_allow_html=True)
     if st.session_state.ai_analysis is None:
         with st.spinner(f"The Royal Advisor is diligently reviewing your judgment, {st.session_state.judge_name}... This may take a moment."):
@@ -299,23 +310,20 @@ def display_ai_analysis():
 
 # --- Main Application Flow ---
 if not st.session_state.api_key_valid and st.session_state.game_stage != "welcome":
-    # If API key becomes invalid mid-game (e.g., after app restart without .env)
-    st.session_state.game_stage = "welcome" # Force back to welcome to show API key error
+    st.session_state.game_stage = "welcome"
 
 if st.session_state.game_stage == "welcome":
     display_welcome()
 elif st.session_state.game_stage == "scenario_presented":
-    if not st.session_state.player_name or not st.session_state.api_key_valid:
-        st.session_state.game_stage = "welcome"
-        st.rerun()
-    else:
-        display_scenario_and_task()
+    # Animated transition trigger for scenario
+    if not st.session_state.get('show_balloons', False):
+        st.session_state.show_balloons = True
+    display_scenario_and_task()
 elif st.session_state.game_stage == "judgment_submitted":
-    if not st.session_state.api_key_valid:
-        st.session_state.game_stage = "welcome"
-        st.rerun()
-    else:
-        display_ai_analysis()
+    # Animated transition trigger for analysis
+    if not st.session_state.get('show_snow', False):
+        st.session_state.show_snow = True
+    display_ai_analysis()
 else:
     st.error("An unexpected error occurred in the game flow. Resetting.")
     st.session_state.game_stage = "welcome"
