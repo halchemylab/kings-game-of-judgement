@@ -31,6 +31,8 @@ The scenario should be suitable for a text-based adventure game and must include
 
 The scenario should begin by addressing the judge directly, incorporating their name: "Before you, Judge {player_name}, stand two individuals..." or similar.
 
+DIFFICULTY: The scenario should be written at a "{difficulty}" level. For "Simple," keep the facts and dispute straightforward, with minimal ambiguity. For "Moderate," introduce some complexity, competing interests, or subtle ambiguities. For "Complex," make the scenario multi-layered, with conflicting values, unclear facts, and significant moral or legal dilemmas.
+
 Do not include any preamble like "Okay, here's a scenario:". Just provide the scenario text directly.
 Ensure the scenario is engaging and presents a genuine dilemma.
 """
@@ -68,15 +70,14 @@ Be specific in your feedback, referring to parts of the scenario and the judgmen
 
 # --- LLM API FUNCTIONS ---
 
-def generate_scenario_with_llm(player_name):
+def generate_scenario_with_llm(player_name, difficulty="Moderate"):
     """
-    Generates a scenario by calling the OpenAI API.
+    Generates a scenario by calling the OpenAI API, with difficulty support.
     """
     if not client:
         return "Error: OpenAI API key not configured. Please set OPENAI_API_KEY in your .env file."
 
-    prompt = SCENARIO_GENERATION_PROMPT_TEMPLATE.format(player_name=player_name)
-    
+    prompt = SCENARIO_GENERATION_PROMPT_TEMPLATE.format(player_name=player_name, difficulty=difficulty)
     try:
         response = client.chat.completions.create(
             model=MODEL_TO_USE,

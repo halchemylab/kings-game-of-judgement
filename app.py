@@ -164,6 +164,8 @@ def init_session_state():
         st.session_state.current_case_id = None
     if "api_key_valid" not in st.session_state: # Track API key status
         st.session_state.api_key_valid = bool(OPENAI_API_KEY)
+    if "difficulty" not in st.session_state:
+        st.session_state.difficulty = "Moderate"  # Default difficulty
 
 
 init_session_state()
@@ -204,6 +206,16 @@ OPENAI_API_KEY=\"your_actual_api_key_here\"\n```
         'will be called upon to resolve complex disputes.'
         '</div>', unsafe_allow_html=True)
 
+    # Difficulty selection (only at start)
+    difficulty = st.radio(
+        "Select Case Difficulty:",
+        ["Simple", "Moderate", "Complex"],
+        index=["Simple", "Moderate", "Complex"].index(st.session_state.get("difficulty", "Moderate")),
+        key="difficulty_radio_key",
+        help="Choose how challenging the cases will be."
+    )
+    st.session_state.difficulty = difficulty
+
     name_input = st.text_input("Pray, tell us your esteemed name to begin:", key="player_name_input_key")
 
     st.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
@@ -215,7 +227,7 @@ OPENAI_API_KEY=\"your_actual_api_key_here\"\n```
             st.session_state.game_stage = "scenario_presented"
             st.session_state.current_case_id = generate_case_id()
             with st.spinner(f"Summoning a new case for {st.session_state.judge_name}... This may take a moment."):
-                scenario_text = generate_scenario_with_llm(st.session_state.player_name)
+                scenario_text = generate_scenario_with_llm(st.session_state.player_name, st.session_state.difficulty)
             def set_scenario(text):
                 st.session_state.current_scenario = text
             if handle_llm_response(scenario_text, set_scenario, "Failed to generate scenario: "):
@@ -232,7 +244,7 @@ def display_scenario_and_task():
         st.balloons()
         time.sleep(1.2)
         st.session_state.show_balloons = False
-    st.markdown('<div class="royal-banner">A New Case Awaits, {}</div>'.format(st.session_state.judge_name), unsafe_allow_html=True)
+    st.markdown('<div class="royal-banner">A New Case Awaits, {} <span style="font-size:1.1rem;font-weight:400;">({} Difficulty)</span></div>'.format(st.session_state.judge_name, st.session_state.difficulty), unsafe_allow_html=True)
     if st.session_state.current_scenario:
         st.markdown('<div class="royal-card"><span class="royal-label">📜 The Case Before You:</span><br>{}</div>'.format(st.session_state.current_scenario), unsafe_allow_html=True)
         st.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
@@ -333,6 +345,7 @@ else:
 st.sidebar.markdown('<div class="sidebar-title">Game Panel</div>', unsafe_allow_html=True)
 if st.session_state.player_name:
     st.sidebar.markdown(f'<div class="sidebar-card">Judge: <b>{st.session_state.judge_name}</b></div>', unsafe_allow_html=True)
+    st.sidebar.markdown(f'<div class="sidebar-card">Difficulty: <b>{st.session_state.difficulty}</b></div>', unsafe_allow_html=True)
     st.sidebar.markdown(f'<div class="sidebar-card">Current Stage: <b>{st.session_state.game_stage.replace("_", " ").title()}</b></div>', unsafe_allow_html=True)
 else:
     st.sidebar.markdown('<div class="sidebar-card">Awaiting Judge\'s arrival.</div>', unsafe_allow_html=True)
