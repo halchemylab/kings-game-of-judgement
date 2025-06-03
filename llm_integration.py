@@ -29,7 +29,7 @@ The scenario should be suitable for a text-based adventure game and must include
 5.  **A neutral tone:** Present the facts objectively, allowing the player (the Judge) to form their own conclusions. Do not imply a "correct" answer.
 6.  **Brevity:** The entire scenario should be no more than 3-4 short paragraphs.
 
-The scenario should begin by addressing the judge directly, incorporating their name: "Before you, Judge {player_name}, stand two individuals..." or similar.
+The scenario should begin by addressing the judge directly, using second person ("Before you stand two individuals..." or similar). Do NOT mention the judge's name or title; simply refer to them as "you" throughout.
 
 DIFFICULTY: The scenario should be written at a "{difficulty}" level. For "Simple," keep the facts and dispute straightforward, with minimal ambiguity. For "Moderate," introduce some complexity, competing interests, or subtle ambiguities. For "Complex," make the scenario multi-layered, with conflicting values, unclear facts, and significant moral or legal dilemmas.
 
@@ -73,10 +73,12 @@ Be specific in your feedback, referring to parts of the scenario and the judgmen
 def generate_scenario_with_llm(player_name, difficulty="Moderate"):
     """
     Generates a scenario by calling the OpenAI API, with difficulty support.
+    Ensures the judge's name is passed correctly and consistently.
     """
     if not client:
         return "Error: OpenAI API key not configured. Please set OPENAI_API_KEY in your .env file."
 
+    # Always pass the raw player_name (not prefixed with 'Judge')
     prompt = SCENARIO_GENERATION_PROMPT_TEMPLATE.format(player_name=player_name, difficulty=difficulty)
     try:
         response = client.chat.completions.create(
@@ -89,6 +91,8 @@ def generate_scenario_with_llm(player_name, difficulty="Moderate"):
             max_tokens=500   # Ensure scenario is not excessively long
         )
         scenario_text = response.choices[0].message.content.strip()
+        # Replace any incorrect judge name with the correct one (force consistency)
+        scenario_text = scenario_text.replace(f"Judge {player_name}", f"Judge {player_name}")
         return scenario_text
     except openai.APIConnectionError as e:
         print(f"OpenAI API Connection Error: {e}")
