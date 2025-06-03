@@ -16,130 +16,59 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    html, body, [class*='css']  {
-        font-family: 'Segoe UI', 'Arial', sans-serif !important;
-        background: #f6f8fa !important;
-        color: #22272e !important;
-    }
     .main {
-        background: #fff !important;
-        border-radius: 16px;
-        box-shadow: 0 4px 24px 0 rgba(60, 60, 60, 0.07);
-        padding: 2rem 2.5rem 2rem 2.5rem;
+        padding: 2rem 2.5rem;
         margin-top: 2rem;
     }
     .stButton>button {
-        background: linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%);
-        color: #fff;
-        border-radius: 8px;
         font-weight: 600;
         font-size: 1.08rem;
-        border: none;
-        transition: 0.2s;
-        box-shadow: 0 2px 8px #6dd5ed33;
+        width: 100%;
     }
-    .stButton>button:active {
-        background: #2193b0;
-    }
-    /* Rainbow effect for critical buttons */
     .rainbow-btn {
-        background: linear-gradient(90deg, #ff5858, #f09819, #fffa65, #43e97b, #38f9d7, #2193b0, #ee0979, #ff5858);
-        background-size: 300% 300%;
-        color: #fff !important;
-        font-weight: bold;
-        border: none;
-        border-radius: 8px;
-        box-shadow: 0 2px 12px #fffa6533;
-        transition: background-position 0.5s, color 0.2s;
-    }
-    .rainbow-btn:hover {
-        background-position: 100% 0;
-        color: #22272e !important;
-        box-shadow: 0 4px 24px #fffa6533;
+        width: 100%;
+        margin-top: 1.2rem;
+        padding: 0.7rem 0;
+        font-size: 1.1rem;
     }
     .royal-banner {
-        background: #2193b0;
-        color: #fff;
-        border-radius: 12px;
         padding: 1rem 1.5rem;
         margin-bottom: 1.5rem;
         font-size: 2rem;
-        font-family: 'Segoe UI', 'Arial', sans-serif;
         text-align: center;
         font-weight: 700;
         letter-spacing: 1px;
-        box-shadow: 0 2px 8px #2193b033;
     }
     .royal-card {
-        background: #f6f8fa;
-        border-radius: 10px;
-        padding: 1.2rem 1.2rem 1rem 1.2rem;
+        padding: 1.2rem;
         margin-bottom: 1.2rem;
-        box-shadow: 0 2px 8px #2193b022;
-        border: 1px solid #e3e8ee;
+        border-radius: 0.5rem;
     }
     .royal-divider {
-        border: 0;
-        height: 2px;
-        background: linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%);
-        margin: 1.2rem 0 1.2rem 0;
+        margin: 1.2rem 0;
     }
     .royal-label {
-        font-family: 'Segoe UI', 'Arial', sans-serif;
         font-size: 1.08rem;
-        color: #2193b0;
         font-weight: 600;
     }
     .stTextInput>div>input, .stTextArea>div>textarea {
-        background: #f6f8fa;
-        border: 1.5px solid #6dd5ed88;
-        border-radius: 8px;
         font-size: 1.08rem;
-        color: #22272e;
     }
-    .stTextInput>div>input:focus, .stTextArea>div>textarea:focus {
-        border: 2px solid #2193b0;
-        outline: none;
-    }
-    /* Sidebar redesign */
+    /* Sidebar layout */
     section[data-testid="stSidebar"] {
-        background: #1a2a36;
-        border-right: 2px solid #2193b0;
-        box-shadow: 2px 0 12px #2193b022;
         padding-top: 1.5rem;
     }
     .sidebar-title {
         font-size: 1.3rem;
         font-weight: 700;
-        color: #6dd5ed;
         margin-bottom: 0.7rem;
         text-align: center;
     }
     .sidebar-card {
-        background: #223344;
-        border-radius: 8px;
         padding: 1rem 1rem 0.7rem 1rem;
         margin-bottom: 1rem;
-        box-shadow: 0 2px 8px #2193b022;
-        border: 1px solid #2193b0;
+        border-radius: 0.5rem;
         font-size: 1.05rem;
-        color: #fff;
-    }
-    .sidebar-critical {
-        color: #ee0979;
-        font-weight: bold;
-        margin-top: 1.2rem;
-        text-align: center;
-    }
-    /* Text area background for better contrast */
-    .stTextArea>div>textarea {
-        background: #223344 !important;
-        color: #fff !important;
-        border: 1.5px solid #6dd5ed88;
-    }
-    .stTextArea>div>textarea:focus {
-        border: 2px solid #2193b0;
-        outline: none;
     }
     </style>
     """,
