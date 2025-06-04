@@ -308,11 +308,6 @@ OPENAI_API_KEY=\"your_actual_api_key_here\"\n```
 
 
 def display_scenario_and_task():
-    # Animated transition: Balloons when a new case is presented
-    if st.session_state.get('show_balloons', False):
-        st.balloons()
-        time.sleep(1.2)
-        st.session_state.show_balloons = False
     st.markdown('<div class="royal-banner" role="heading" aria-level="1">A New Case Awaits, {} <span style="font-size:1.1rem;font-weight:400;">({} Difficulty)</span></div>'.format(st.session_state.judge_name, st.session_state.difficulty), unsafe_allow_html=True)
     if st.session_state.current_scenario:
         # Render the card and label with HTML, but the scenario text with Markdown (for bolding)
@@ -350,11 +345,8 @@ def display_scenario_and_task():
 
 
 def display_ai_analysis():
-    # Animated transition: Snow/confetti when analysis is shown
-    if st.session_state.get('show_snow', False):
-        st.snow()
-        time.sleep(1.2)
-        st.session_state.show_snow = False
+    # Show balloons animation when analysis is loaded
+    st.balloons()
     st.markdown('<div class="royal-banner" role="heading" aria-level="1">The Royal Advisor\'s Counsel for {}</div>'.format(st.session_state.judge_name), unsafe_allow_html=True)
     if st.session_state.ai_analysis is None:
         with st.spinner(f"The Royal Advisor is diligently reviewing your judgment, {st.session_state.judge_name}... This may take a moment."):
@@ -425,14 +417,8 @@ if not st.session_state.api_key_valid and st.session_state.game_stage != "welcom
 if st.session_state.game_stage == "welcome":
     display_welcome()
 elif st.session_state.game_stage == "scenario_presented":
-    # Animated transition trigger for scenario
-    if not st.session_state.get('show_balloons', False):
-        st.session_state.show_balloons = True
     display_scenario_and_task()
 elif st.session_state.game_stage == "judgment_submitted":
-    # Animated transition trigger for analysis
-    if not st.session_state.get('show_snow', False):
-        st.session_state.show_snow = True
     display_ai_analysis()
 else:
     st.error("An unexpected error occurred in the game flow. Resetting.")
