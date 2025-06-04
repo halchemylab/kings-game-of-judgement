@@ -75,6 +75,18 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# --- Input Sanitization Utilities ---
+def sanitize_input(user_input, max_length=100, allow_chars=None):
+    """Sanitize user input to prevent code/HTML/script injection and limit length."""
+    import html
+    if not isinstance(user_input, str):
+        return ""
+    sanitized = user_input.strip()[:max_length]
+    sanitized = html.escape(sanitized)
+    if allow_chars:
+        sanitized = ''.join(c for c in sanitized if c in allow_chars)
+    return sanitized
+
 # --- Session State Initialization ---
 def init_session_state():
     if "player_name" not in st.session_state:
@@ -150,9 +162,10 @@ OPENAI_API_KEY=\"your_actual_api_key_here\"\n```
     st.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
 
     if st.button("✨ Begin My Tenure as Judge", key="begin_judge_btn", help="Start the game!"):
-        if name_input:
-            st.session_state.player_name = name_input.strip()
-            st.session_state.judge_name = f"Judge {st.session_state.player_name}"
+        sanitized_name = sanitize_input(name_input, max_length=32, allow_chars=None)
+        if sanitized_name:
+            st.session_state.player_name = sanitized_name
+            st.session_state.judge_name = f"Judge {sanitized_name}"
             st.session_state.game_stage = "scenario_presented"
             st.session_state.current_case_id = generate_case_id()
             with st.spinner(f"Summoning a new case for {st.session_state.judge_name}... This may take a moment."):
@@ -164,7 +177,7 @@ OPENAI_API_KEY=\"your_actual_api_key_here\"\n```
             else:
                 st.session_state.game_stage = "welcome"
         else:
-            st.warning("A Judge must have a name! Please enter yours.")
+            st.warning("A Judge must have a valid name! Please enter yours.")
 
 
 def display_scenario_and_task():
@@ -187,12 +200,13 @@ def display_scenario_and_task():
         judgment_text = st.text_area("Enter your judgment here:", height=200, key="judgment_input_key")
         st.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
         if st.button("⚖️ Submit Your Judgment", key="submit_judgment_btn", help="Submit your decision!", use_container_width=True):
-            if judgment_text.strip():
-                st.session_state.player_judgment = judgment_text.strip()
+            sanitized_judgment = sanitize_input(judgment_text, max_length=1000, allow_chars=None)
+            if sanitized_judgment:
+                st.session_state.player_judgment = sanitized_judgment
                 st.session_state.game_stage = "judgment_submitted"
                 st.rerun()
             else:
-                st.warning("An empty scroll offers no wisdom. Please pen your judgment.")
+                st.warning("An empty or invalid scroll offers no wisdom. Please pen your judgment.")
     else:
         st.error("Apologies, the scenario is missing. Let's try to fetch a new one.")
         if st.button("Fetch New Case", key="fetch_new_case_btn"):
