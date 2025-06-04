@@ -392,9 +392,15 @@ def display_ai_analysis():
                     st.error("There was a secure file handling error while archiving this case.")
             else:
                 st.info("Case not saved as the AI analysis encountered an error.")
-        # Rainbow button for critical action, with ARIA label
-        rainbow_btn_html = '''<button class="rainbow-btn" onclick="window.location.reload()" aria-label="Hear Another Case" style="width:100%;margin-top:1.2rem;padding:0.7rem 0;font-size:1.1rem;">📜 Hear Another Case</button>'''
-        st.markdown(rainbow_btn_html, unsafe_allow_html=True)
+        # Normal button for critical action, replacing rainbow style
+        if st.button("📜 Hear Another Case", key="hear_another_case_btn", help="Start a new case", use_container_width=True, type="primary"):
+            st.session_state.game_stage = "welcome"
+            st.session_state.player_name = ""
+            st.session_state.current_scenario = None
+            st.session_state.player_judgment = ""
+            st.session_state.ai_analysis = None
+            st.session_state.current_case_id = None
+            st.rerun()
     else:
         st.error("The Advisor seems to be indisposed. Unable to retrieve analysis at this time.")
         if st.button("Try Analysis Again", key="try_analysis_btn2"):
