@@ -376,7 +376,10 @@ def display_ai_analysis():
                 st.rerun()
             return
     if st.session_state.ai_analysis:
-        st.markdown('<section class="royal-card" role="region" aria-label="Advisor Analysis"><span class="royal-label">🧐 Advisor\'s Analysis:</span><br>{}</section>'.format(st.session_state.ai_analysis), unsafe_allow_html=True)
+        # Render the card and label with HTML, but the analysis text with Markdown (for bolding)
+        st.markdown('<section class="royal-card" role="region" aria-label="Advisor Analysis"><span class="royal-label">🧐 Advisor\'s Analysis:</span><br>', unsafe_allow_html=True)
+        st.markdown(st.session_state.ai_analysis)  # This will render **bold** as bold
+        st.markdown('</section>', unsafe_allow_html=True)
         st.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
         if st.session_state.current_case_id and st.session_state.current_scenario and st.session_state.player_judgment and st.session_state.ai_analysis:
             if not st.session_state.ai_analysis.startswith("Error:"):
