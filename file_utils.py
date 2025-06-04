@@ -18,12 +18,15 @@ def ensure_past_cases_dir_exists():
             return False
     return True
 
-def save_case(case_id, player_name, scenario, judgment, analysis):
-    """Saves a completed case to a text file."""
+def save_case(case_id, player_name, scenario, judgment, analysis, case_path=None):
+    """Saves a completed case to a text file. Uses a safe path if provided."""
     if not ensure_past_cases_dir_exists():
         return False
 
-    filename = os.path.join(PAST_CASES_DIR, f"case_{case_id}.txt")
+    if case_path is not None:
+        filename = case_path
+    else:
+        filename = os.path.join(PAST_CASES_DIR, f"case_{case_id}.txt")
     
     content = f"Case ID: {case_id}\n"
     content += f"Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
@@ -38,7 +41,6 @@ def save_case(case_id, player_name, scenario, judgment, analysis):
     try:
         with open(filename, "w", encoding="utf-8") as f:
             f.write(content)
-        return True
     except IOError as e:
         print(f"Error saving case {case_id} to {filename}: {e}")
         return False

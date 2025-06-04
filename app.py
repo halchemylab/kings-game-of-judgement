@@ -241,16 +241,21 @@ def display_ai_analysis():
         st.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
         if st.session_state.current_case_id and st.session_state.current_scenario and st.session_state.player_judgment and st.session_state.ai_analysis:
             if not st.session_state.ai_analysis.startswith("Error:"):
-                if save_case(
-                    st.session_state.current_case_id,
-                    st.session_state.player_name,
-                    st.session_state.current_scenario,
-                    st.session_state.player_judgment,
-                    st.session_state.ai_analysis
-                ):
-                    st.success(f"This case (ID: {st.session_state.current_case_id}) has been chronicled in the royal archives ({os.path.join('past_cases', f'case_{st.session_state.current_case_id}.txt')}).")
-                else:
-                    st.error("There was an issue archiving this case.")
+                case_path = safe_case_filename(st.session_state.current_case_id)
+                try:
+                    if save_case(
+                        st.session_state.current_case_id,
+                        st.session_state.player_name,
+                        st.session_state.current_scenario,
+                        st.session_state.player_judgment,
+                        st.session_state.ai_analysis,
+                        case_path=case_path
+                    ):
+                        st.success(f"This case (ID: {st.session_state.current_case_id}) has been chronicled in the royal archives ({case_path}).")
+                    else:
+                        st.error("There was an issue archiving this case.")
+                except Exception as e:
+                    st.error("There was a secure file handling error while archiving this case.")
             else:
                 st.info("Case not saved as the AI analysis encountered an error.")
         # Rainbow button for critical action
@@ -261,6 +266,14 @@ def display_ai_analysis():
         if st.button("Try Analysis Again", key="try_analysis_btn2"):
             st.session_state.ai_analysis = None
             st.rerun()
+
+
+# --- Secure File Handling for Case Saving/Loading ---
+def safe_case_filename(case_id):
+    """Generate a safe filename for a case, preventing path traversal."""
+    import re
+    safe_id = re.sub(r'[^\w\-]', '', str(case_id))
+    return os.path.join('past_cases', f'case_{safe_id}.txt')
 
 
 # --- Main Application Flow ---
