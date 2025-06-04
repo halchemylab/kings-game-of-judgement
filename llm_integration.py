@@ -68,6 +68,22 @@ Do not include any preamble like "Okay, here's my analysis:". Just provide the a
 Be specific in your feedback, referring to parts of the scenario and the judgment.
 """
 
+# --- Highlight Important Parts Prompt ---
+HIGHLIGHT_IMPORTANT_PARTS_PROMPT_TEMPLATE = """
+Given the following scenario from a legal/ethical game, identify and highlight the most important names, objects, and facts by wrapping them in double asterisks for bold (Markdown: **like this**). Do not use any colors or HTML, only Markdown bold. Return the scenario with the important parts bolded, preserving the original structure and wording as much as possible.
+
+Scenario:
+{scenario}
+"""
+
+# --- Highlight Important Parts in Analysis Prompt ---
+HIGHLIGHT_ANALYSIS_IMPORTANT_PARTS_PROMPT_TEMPLATE = """
+Given the following analysis from a legal/ethical game, identify and highlight the most important names, values, and conclusions by wrapping them in double asterisks for bold (Markdown: **like this**). Do not use any colors or HTML, only Markdown bold. Return the analysis with the important parts bolded, preserving the original structure and wording as much as possible.
+
+Analysis:
+{analysis}
+"""
+
 # --- LLM API FUNCTIONS ---
 
 def generate_scenario_with_llm(player_name, difficulty="Moderate"):
@@ -145,3 +161,50 @@ def analyze_judgment_with_llm(player_judgment, scenario_details, player_name):
     except Exception as e:
         print(f"An unexpected error occurred during judgment analysis: {e}")
         return f"Error: An unexpected disturbance in the æther (Error: {e}). The advisor is momentarily perplexed."
+
+
+def highlight_important_parts_with_llm(scenario_text):
+    """
+    Calls the LLM to bold important parts of the scenario using Markdown.
+    """
+    if not client:
+        return "Error: OpenAI API key not configured. Please set OPENAI_API_KEY in your .env file."
+    prompt = HIGHLIGHT_IMPORTANT_PARTS_PROMPT_TEMPLATE.format(scenario=scenario_text)
+    try:
+        response = client.chat.completions.create(
+            model=MODEL_TO_USE,
+            messages=[
+                {"role": "system", "content": "You are an assistant that highlights important parts of a scenario for a game using Markdown bold only."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.2,
+            max_tokens=600
+        )
+        highlighted_text = response.choices[0].message.content.strip()
+        return highlighted_text
+    except Exception as e:
+        print(f"Error during highlighting: {e}")
+        return f"Error: Could not highlight important parts ({e})"
+
+def highlight_important_parts_in_analysis_with_llm(analysis_text):
+    """
+    Calls the LLM to bold important parts of the analysis using Markdown.
+    """
+    if not client:
+        return "Error: OpenAI API key not configured. Please set OPENAI_API_KEY in your .env file."
+    prompt = HIGHLIGHT_ANALYSIS_IMPORTANT_PARTS_PROMPT_TEMPLATE.format(analysis=analysis_text)
+    try:
+        response = client.chat.completions.create(
+            model=MODEL_TO_USE,
+            messages=[
+                {"role": "system", "content": "You are an assistant that highlights important parts of an analysis for a game using Markdown bold only."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.2,
+            max_tokens=700
+        )
+        highlighted_text = response.choices[0].message.content.strip()
+        return highlighted_text
+    except Exception as e:
+        print(f"Error during analysis highlighting: {e}")
+        return f"Error: Could not highlight important parts in analysis ({e})"

@@ -2,7 +2,7 @@
 import streamlit as st
 import os # For joining path in save_case success message
 import time
-from llm_integration import generate_scenario_with_llm, analyze_judgment_with_llm, OPENAI_API_KEY
+from llm_integration import generate_scenario_with_llm, analyze_judgment_with_llm, OPENAI_API_KEY, highlight_important_parts_with_llm, highlight_important_parts_in_analysis_with_llm
 from file_utils import save_case, generate_case_id
 
 # --- Page Configuration ---
@@ -292,6 +292,11 @@ OPENAI_API_KEY=\"your_actual_api_key_here\"\n```
             st.session_state.current_case_id = generate_case_id()
             with st.spinner(f"Summoning a new case for {st.session_state.judge_name}... This may take a moment."):
                 scenario_text = generate_scenario_with_llm(st.session_state.player_name, st.session_state.difficulty)
+                # Highlight important parts after scenario is generated
+                if not scenario_text.startswith("Error:"):
+                    highlighted = highlight_important_parts_with_llm(scenario_text)
+                    if not highlighted.startswith("Error:"):
+                        scenario_text = highlighted
             def set_scenario(text):
                 st.session_state.current_scenario = text
             if handle_llm_response(scenario_text, set_scenario, "Failed to generate scenario: "):
@@ -310,7 +315,10 @@ def display_scenario_and_task():
         st.session_state.show_balloons = False
     st.markdown('<div class="royal-banner" role="heading" aria-level="1">A New Case Awaits, {} <span style="font-size:1.1rem;font-weight:400;">({} Difficulty)</span></div>'.format(st.session_state.judge_name, st.session_state.difficulty), unsafe_allow_html=True)
     if st.session_state.current_scenario:
-        st.markdown('<section class="royal-card" role="region" aria-label="Case Scenario"><span class="royal-label">📜 The Case Before You:</span><br>{}</section>'.format(st.session_state.current_scenario), unsafe_allow_html=True)
+        # Render the card and label with HTML, but the scenario text with Markdown (for bolding)
+        st.markdown('<section class="royal-card" role="region" aria-label="Case Scenario"><span class="royal-label">📜 The Case Before You:</span><br>', unsafe_allow_html=True)
+        st.markdown(st.session_state.current_scenario)  # This will render **bold** as bold
+        st.markdown('</section>', unsafe_allow_html=True)
         st.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
         st.markdown('<section class="royal-card" role="region" aria-label="Your Task"><span class="royal-label">Your Task, {}</span><br>'.format(st.session_state.judge_name) +
             "Considering the facts, the written rules (if any were implied or provided in the scenario), "
@@ -334,6 +342,10 @@ def display_scenario_and_task():
         if st.button("Fetch New Case", key="fetch_new_case_btn"):
             st.session_state.game_stage = "welcome"
             st.session_state.player_name = ""
+            st.session_state.current_scenario = None
+            st.session_state.player_judgment = ""
+            st.session_state.ai_analysis = None
+            st.session_state.current_case_id = None
             st.rerun()
 
 
@@ -351,6 +363,11 @@ def display_ai_analysis():
                 st.session_state.current_scenario,
                 st.session_state.player_name
             )
+            # Highlight important parts after analysis is generated
+            if not analysis_result.startswith("Error:"):
+                highlighted = highlight_important_parts_in_analysis_with_llm(analysis_result)
+                if not highlighted.startswith("Error:"):
+                    analysis_result = highlighted
         def set_analysis(text):
             st.session_state.ai_analysis = text
         if not handle_llm_response(analysis_result, set_analysis, "Failed to get Advisor's analysis: "):
