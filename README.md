@@ -13,8 +13,15 @@ A text-based, interactive ethical and legal dilemma game powered by OpenAI's GPT
 - **Case Archiving:** All resolved cases are saved locally for review.
 - **Modern, Accessible UI:** Built with Streamlit, featuring custom styling and accessibility enhancements.
 
-## Demo
-![Screenshot of The King's Game of Judgement](screenshot.png) <!-- Add a screenshot if available -->
+## Screenshots
+
+**Welcome and Case Generation:**
+
+![Welcome and Case Generation](screenshots/Screenshot%20112455.png)
+
+**Judgment and Advisor Analysis:**
+
+![Judgment and Advisor Analysis](screenshots/Screenshot%20112528.png)
 
 ## Getting Started
 
@@ -53,6 +60,7 @@ The app will open in your browser. Enter your name, select a difficulty, and beg
 - `requirements.txt` — Python dependencies
 - `.env` — Your OpenAI API key (not committed to git)
 - `past_cases/` — Saved case files (auto-created)
+- `screenshots/` — App screenshots
 
 ## Environment Variables
 - `OPENAI_API_KEY` — Your OpenAI API key (required)
