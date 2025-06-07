@@ -10,8 +10,10 @@ A text-based, interactive ethical and legal dilemma game powered by OpenAI's GPT
 - **AI-Generated Scenarios:** Each case is crafted by GPT-4o, with adjustable difficulty (Simple, Moderate, Complex).
 - **Interactive Judging:** Enter your judgment and reasoning for each scenario.
 - **Royal Advisor Feedback:** Receive detailed, encouraging analysis of your decisions from the AI.
-- **Case Archiving:** All resolved cases are saved locally for review.
-- **Modern, Accessible UI:** Built with Streamlit, featuring custom styling and accessibility enhancements.
+- **Case Archiving:** All resolved cases are saved locally for review in the `past_cases/` folder.
+- **Modern, Accessible UI:** Built with Streamlit, featuring custom CSS for a legible, responsive, and accessible interface.
+- **Input Sanitization:** All user input is sanitized to prevent code/HTML/script injection.
+- **No Data Sharing:** Your API key and judgments are never sent anywhere except OpenAI's API.
 
 ## Screenshots
 
@@ -73,10 +75,17 @@ The app will open in your browser. Enter your name, select a difficulty, and beg
 - **No Scenarios/Analysis:**
   - Check your internet connection.
   - Review the Streamlit logs for error messages.
+- **File Save Issues:**
+  - Ensure the `past_cases/` directory is writable.
 
 ## Security & Privacy
 - Your API key is never shared or logged.
 - All case data is stored locally in `past_cases/`.
+- Input is sanitized to prevent code injection.
+
+## Accessibility
+- The UI uses ARIA labels, high-contrast modes, and keyboard focus outlines for accessibility.
+- Responsive design for mobile and desktop.
 
 ## License
 MIT License. See [LICENSE](LICENSE) for details.
