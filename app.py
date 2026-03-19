@@ -254,15 +254,22 @@ def init_session_state():
 init_session_state()
 
 # --- Helper function to check for errors from LLM calls ---
-def handle_llm_response(response_text, success_callback, error_message_prefix=""):
-    if response_text and response_text.startswith("Error:"):
-        st.error(f"{error_message_prefix}{response_text}")
+def handle_llm_response(response, success_callback, error_message_prefix=""):
+    if isinstance(response, dict):
+        if "error" in response:
+            st.error(f"{error_message_prefix}{response['error']}")
+            return False
+        success_callback(response)
+        return True
+    
+    if response and isinstance(response, str) and response.startswith("Error:"):
+        st.error(f"{error_message_prefix}{response}")
         return False
-    elif not response_text:
+    elif not response:
         st.error(f"{error_message_prefix}Received an empty response from the AI. Please try again.")
         return False
     else:
-        success_callback(response_text)
+        success_callback(response)
         return True
 
 # --- Game UI and Logic ---
@@ -315,14 +322,12 @@ OPENAI_API_KEY=\"your_actual_api_key_here\"\n```
                 st.session_state.game_stage = "scenario_presented"
                 st.session_state.current_case_id = generate_case_id()
                 with st.spinner(f"Summoning a new case for {st.session_state.judge_name}... This may take a moment."):
-                    scenario_text = generate_scenario_with_llm(st.session_state.player_name, st.session_state.difficulty)
-                    if not scenario_text.startswith("Error:"):
-                        highlighted = highlight_important_parts_with_llm(scenario_text)
-                        if not highlighted.startswith("Error:"):
-                            scenario_text = highlighted
-                def set_scenario(text):
-                    st.session_state.current_scenario = text
-                if handle_llm_response(scenario_text, set_scenario, "Failed to generate scenario: "):
+                    scenario_data = generate_scenario_with_llm(st.session_state.player_name, st.session_state.difficulty)
+                
+                def set_scenario(data):
+                    st.session_state.current_scenario = data.get("highlighted_scenario", data.get("scenario", ""))
+                
+                if handle_llm_response(scenario_data, set_scenario, "Failed to generate scenario: "):
                     placeholder.empty()
                     time.sleep(0.5)
                     st.rerun()
@@ -381,18 +386,16 @@ def display_ai_analysis():
         st.markdown('<div class="royal-banner" role="heading" aria-level="1">The Royal Advisor\'s Counsel for {}</div>'.format(st.session_state.judge_name), unsafe_allow_html=True)
         if st.session_state.ai_analysis is None:
             with st.spinner(f"The Royal Advisor is diligently reviewing your judgment, {st.session_state.judge_name}... This may take a moment."):
-                analysis_result = analyze_judgment_with_llm(
+                analysis_data = analyze_judgment_with_llm(
                     st.session_state.player_judgment,
                     st.session_state.current_scenario,
                     st.session_state.player_name
                 )
-                if not analysis_result.startswith("Error:"):
-                    highlighted = highlight_important_parts_in_analysis_with_llm(analysis_result)
-                    if not highlighted.startswith("Error:"):
-                        analysis_result = highlighted
-            def set_analysis(text):
-                st.session_state.ai_analysis = text
-            if not handle_llm_response(analysis_result, set_analysis, "Failed to get Advisor's analysis: "):
+            
+            def set_analysis(data):
+                st.session_state.ai_analysis = data.get("highlighted_analysis", data.get("analysis", ""))
+            
+            if not handle_llm_response(analysis_data, set_analysis, "Failed to get Advisor's analysis: "):
                 if st.button("Try Analysis Again", key="try_analysis_btn"):
                     st.session_state.ai_analysis = None
                     st.rerun()
