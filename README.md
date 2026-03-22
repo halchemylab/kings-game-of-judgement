@@ -45,6 +45,7 @@ A text-based, interactive ethical and legal dilemma game powered by OpenAI's GPT
    - Create a `.env` file in the project root:
      ```env
      OPENAI_API_KEY=your_openai_api_key_here
+     OPENAI_MODEL=gpt-4o  # Optional: Defaults to gpt-4o if omitted
      ```
    - Do **not** use quotes around the API key.
 
@@ -66,6 +67,7 @@ The app will open in your browser. Enter your name, select a difficulty, and beg
 
 ## Environment Variables
 - `OPENAI_API_KEY` — Your OpenAI API key (required)
+- `OPENAI_MODEL` — The OpenAI model to use (optional, defaults to `gpt-4o`)
 
 ## Troubleshooting
 - **API Key Errors:**

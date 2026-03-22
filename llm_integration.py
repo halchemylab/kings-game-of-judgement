@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-MODEL_TO_USE = "gpt-4o" # Specify the model here
+MODEL_TO_USE = os.getenv("OPENAI_MODEL", "gpt-4o")
 
 # Initialize OpenAI client globally if API key is available
 if OPENAI_API_KEY:
