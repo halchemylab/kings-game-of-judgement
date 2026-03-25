@@ -63,6 +63,7 @@ Analysis Guidelines:
 In addition to the raw analysis, provide a version where important names, values, and conclusions are wrapped in double asterisks for bold (Markdown: **like this**).
 
 Return your response as a JSON object with the following keys:
+- "thought_process": Your internal, step-by-step reasoning about the case and the judgment. Use this to ensure your final analysis is logical and consistent. This part will be hidden from the player.
 - "analysis": The raw text of the advisor's analysis.
 - "highlighted_analysis": The analysis text with key parts bolded using Markdown.
 """
@@ -114,7 +115,7 @@ def analyze_judgment_with_llm(player_judgment, scenario_details, player_name):
         response = client.chat.completions.create(
             model=MODEL_TO_USE,
             messages=[
-                {"role": "system", "content": "You are a supportive Royal Advisor. Respond ONLY with a JSON object containing 'analysis' and 'highlighted_analysis'."},
+                {"role": "system", "content": "You are a supportive Royal Advisor. Respond ONLY with a JSON object containing 'thought_process', 'analysis', and 'highlighted_analysis'."},
                 {"role": "user", "content": prompt}
             ],
             response_format={"type": "json_object"},

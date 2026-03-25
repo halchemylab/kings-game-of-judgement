@@ -48,15 +48,30 @@ def test_analyze_judgment_with_llm_success(mock_openai_client):
     # Mock successful JSON response
     mock_response = MagicMock()
     mock_response.choices[0].message.content = json.dumps({
+        "thought_process": "Internal reasoning here.",
         "analysis": "You were very wise.",
         "highlighted_analysis": "You were very **wise**."
     })
     mock_openai_client.chat.completions.create.return_value = mock_response
     
+    from llm_integration import MODEL_TO_USE
     result = analyze_judgment_with_llm("I give the goose back.", "The golden goose case.", "Arthur")
     
     assert "analysis" in result
     assert "**wise**" in result["highlighted_analysis"]
+    assert "thought_process" in result
+    
+    from unittest.mock import ANY
+    mock_openai_client.chat.completions.create.assert_called_once_with(
+        model=MODEL_TO_USE,
+        messages=[
+            {"role": "system", "content": "You are a supportive Royal Advisor. Respond ONLY with a JSON object containing 'thought_process', 'analysis', and 'highlighted_analysis'."},
+            {"role": "user", "content": ANY}
+        ],
+        response_format={"type": "json_object"},
+        temperature=0.7,
+        max_tokens=1200
+    )
 
 def test_analyze_judgment_with_llm_no_client():
     with patch("llm_integration.client", None):
