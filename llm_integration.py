@@ -8,6 +8,7 @@ load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 MODEL_TO_USE = os.getenv("OPENAI_MODEL", "gpt-4o")
+CHEAP_MODEL_TO_USE = os.getenv("OPENAI_CHEAP_MODEL", "gpt-4o-mini")
 
 # Initialize OpenAI client globally if API key is available
 if OPENAI_API_KEY:
@@ -70,9 +71,10 @@ Return your response as a JSON object with the following keys:
 
 import json
 
-def generate_scenario_with_llm(player_name, difficulty="Moderate"):
+def generate_scenario_with_llm(player_name, difficulty="Moderate", model=CHEAP_MODEL_TO_USE):
     """
     Generates a structured scenario (raw and highlighted) in a single LLM call.
+    Uses a cheaper model by default to save costs.
     """
     if not client:
         return {"error": "OpenAI API key not configured."}
@@ -80,7 +82,7 @@ def generate_scenario_with_llm(player_name, difficulty="Moderate"):
     prompt = SCENARIO_GENERATION_JSON_PROMPT_TEMPLATE.format(difficulty=difficulty)
     try:
         response = client.chat.completions.create(
-            model=MODEL_TO_USE,
+            model=model,
             messages=[
                 {"role": "system", "content": "You are a master storyteller. Respond ONLY with a JSON object containing 'scenario' and 'highlighted_scenario'."},
                 {"role": "user", "content": prompt}

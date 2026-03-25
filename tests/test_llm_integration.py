@@ -17,12 +17,23 @@ def test_generate_scenario_with_llm_success(mock_openai_client):
     })
     mock_openai_client.chat.completions.create.return_value = mock_response
     
+    from llm_integration import CHEAP_MODEL_TO_USE
     result = generate_scenario_with_llm("Arthur", "Simple")
     
     assert "scenario" in result
     assert "highlighted_scenario" in result
     assert "**golden goose**" in result["highlighted_scenario"]
-    mock_openai_client.chat.completions.create.assert_called_once()
+    from unittest.mock import ANY
+    mock_openai_client.chat.completions.create.assert_called_once_with(
+        model=CHEAP_MODEL_TO_USE,
+        messages=[
+            {"role": "system", "content": "You are a master storyteller. Respond ONLY with a JSON object containing 'scenario' and 'highlighted_scenario'."},
+            {"role": "user", "content": ANY}
+        ],
+        response_format={"type": "json_object"},
+        temperature=0.8,
+        max_tokens=1000
+    )
 
 def test_generate_scenario_with_llm_error(mock_openai_client):
     # Mock an API error
