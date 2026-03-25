@@ -24,7 +24,7 @@ def test_save_case(temp_case_dir):
     
     success = save_case(case_id, player_name, scenario, judgment, analysis)
     
-    assert success is not False # save_case returns None on success currently
+    assert success is True
     
     case_file = temp_case_dir / f"case_{case_id}.txt"
     assert case_file.exists()
@@ -33,6 +33,25 @@ def test_save_case(temp_case_dir):
     assert f"Case ID: {case_id}" in content
     assert f"--- JUDGMENT BY JUDGE {player_name} ---" in content
     assert scenario in content
+
+def test_load_case(temp_case_dir):
+    from file_utils import load_case
+    case_id = "load_test_456"
+    player_name = "LoaderJudge"
+    scenario = "The case of the missing cake."
+    judgment = "The baker is innocent."
+    analysis = "A fair ruling indeed."
+    
+    save_case(case_id, player_name, scenario, judgment, analysis)
+    
+    loaded_data = load_case(f"case_{case_id}.txt")
+    
+    assert loaded_data is not None
+    assert loaded_data["case_id"] == case_id
+    assert loaded_data["player_name"] == player_name
+    assert loaded_data["scenario"] == scenario
+    assert loaded_data["judgment"] == judgment
+    assert loaded_data["analysis"] == analysis
 
 def test_list_past_cases(temp_case_dir):
     # Initially empty

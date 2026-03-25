@@ -3,7 +3,7 @@ import streamlit as st
 import os # For joining path in save_case success message
 import time
 from llm_integration import generate_scenario_with_llm, analyze_judgment_with_llm, OPENAI_API_KEY, highlight_important_parts_with_llm, highlight_important_parts_in_analysis_with_llm
-from file_utils import save_case, generate_case_id
+from file_utils import save_case, generate_case_id, list_past_cases, load_case
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -158,6 +158,13 @@ st.markdown(
         font-weight: 700;
         margin-bottom: 1rem;
     }
+    .sidebar-btn > button {
+        background: #fbbf24 !important;
+        color: #7c4700 !important;
+        border: none !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.5rem !important;
+    }
     /* Focus outline for all interactive elements */
     button:focus, input:focus, textarea:focus {
         outline: 2px solid #3b82f6 !important;
@@ -249,6 +256,8 @@ def init_session_state():
         st.session_state.api_key_valid = bool(OPENAI_API_KEY)
     if "difficulty" not in st.session_state:
         st.session_state.difficulty = "Moderate"  # Default difficulty
+    if "selected_archive_case" not in st.session_state:
+        st.session_state.selected_archive_case = None
 
 
 init_session_state()
@@ -441,6 +450,58 @@ def display_ai_analysis():
                 st.rerun()
 
 
+def display_archives():
+    placeholder = st.empty()
+    with placeholder.container():
+        st.markdown('<div class="royal-banner" role="heading" aria-level="1">The Royal Archives</div>', unsafe_allow_html=True)
+        
+        past_cases = list_past_cases()
+        if not past_cases:
+            st.info("The royal archives are currently empty. Resolve some cases to see them here!")
+            if st.button("Back to Kingdom", key="back_to_kingdom_empty_btn"):
+                st.session_state.game_stage = "welcome"
+                st.rerun()
+            return
+
+        col1, col2 = st.columns([1, 2])
+        
+        with col1:
+            st.markdown('<span class="royal-label">Select a Case:</span>', unsafe_allow_html=True)
+            for case_file in past_cases:
+                # Format label for better readability (e.g., from case_20240325_... to 2024-03-25 ...)
+                label = case_file.replace("case_", "").replace(".txt", "").replace("_", " ")
+                if st.button(f"📜 {label}", key=f"select_{case_file}"):
+                    st.session_state.selected_archive_case = case_file
+            
+            st.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
+            if st.button("🔙 Back to Kingdom", key="back_to_kingdom_btn", use_container_width=True):
+                st.session_state.game_stage = "welcome"
+                st.session_state.selected_archive_case = None
+                st.rerun()
+
+        with col2:
+            if st.session_state.selected_archive_case:
+                case_data = load_case(st.session_state.selected_archive_case)
+                if case_data:
+                    st.markdown(f'<section class="royal-card"><b>Case ID:</b> {case_data["case_id"]}<br><b>Date:</b> {case_data["date"]}<br><b>Judge:</b> {case_data["player_name"]}</section>', unsafe_allow_html=True)
+                    
+                    st.markdown('<section class="royal-card"><span class="royal-label">📜 The Case:</span><br>', unsafe_allow_html=True)
+                    st.markdown(case_data["scenario"])
+                    st.markdown('</section>', unsafe_allow_html=True)
+                    
+                    st.markdown('<section class="royal-card"><span class="royal-label">⚖️ Judgment:</span><br>', unsafe_allow_html=True)
+                    st.markdown(case_data["judgment"])
+                    st.markdown('</section>', unsafe_allow_html=True)
+                    
+                    st.markdown('<section class="royal-card" style="background:#fefce8;"><span class="royal-label">🧐 Advisor\'s Analysis:</span><br>', unsafe_allow_html=True)
+                    st.markdown(case_data["analysis"])
+                    st.markdown('</section>', unsafe_allow_html=True)
+                else:
+                    st.error("Failed to load case data.")
+            else:
+                st.info("Select a scroll from the left to read its chronicles.")
+
+
 # --- Secure File Handling for Case Saving/Loading ---
 def safe_case_filename(case_id):
     """Generate a safe filename for a case, preventing path traversal."""
@@ -459,6 +520,8 @@ elif st.session_state.game_stage == "scenario_presented":
     display_scenario_and_task()
 elif st.session_state.game_stage == "judgment_submitted":
     display_ai_analysis()
+elif st.session_state.game_stage == "archives":
+    display_archives()
 else:
     st.error("An unexpected error occurred in the game flow. Resetting.")
     st.session_state.game_stage = "welcome"
@@ -470,6 +533,22 @@ if st.session_state.player_name:
     st.sidebar.markdown(f'<div class="sidebar-card" role="region" aria-label="Judge Name">Judge: <b>{st.session_state.judge_name}</b></div>', unsafe_allow_html=True)
     st.sidebar.markdown(f'<div class="sidebar-card" role="region" aria-label="Difficulty">Difficulty: <b>{st.session_state.difficulty}</b></div>', unsafe_allow_html=True)
     st.sidebar.markdown(f'<div class="sidebar-card" role="region" aria-label="Current Stage">Current Stage: <b>{st.session_state.game_stage.replace("_", " ").title()}</b></div>', unsafe_allow_html=True)
+    
+    if st.session_state.game_stage != "archives":
+        st.sidebar.markdown('<div class="sidebar-btn">', unsafe_allow_html=True)
+        if st.sidebar.button("📜 View Royal Archives", key="view_archives_btn", use_container_width=True):
+            st.session_state.game_stage = "archives"
+            st.rerun()
+        st.sidebar.markdown('</div>', unsafe_allow_html=True)
+    
+    if st.sidebar.button("🔄 Reset Game", key="reset_game_btn", use_container_width=True):
+        st.session_state.game_stage = "welcome"
+        st.session_state.player_name = ""
+        st.session_state.current_scenario = None
+        st.session_state.player_judgment = ""
+        st.session_state.ai_analysis = None
+        st.session_state.current_case_id = None
+        st.rerun()
 else:
     st.sidebar.markdown('<div class="sidebar-card" role="region" aria-label="Awaiting Judge">Awaiting Judge\'s arrival.</div>', unsafe_allow_html=True)
 st.sidebar.markdown('<div class="sidebar-card" role="region" aria-label="Cases Resolved">Cases Resolved: <b>{}</b></div>'.format(len([f for f in os.listdir('past_cases') if f.startswith('case_')]) if os.path.exists('past_cases') else 0), unsafe_allow_html=True)
