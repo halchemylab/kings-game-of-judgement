@@ -29,7 +29,11 @@ The scenario must include:
 5. A neutral, objective tone.
 6. Brevity (3-4 short paragraphs).
 
-DIFFICULTY: {difficulty}. Adjust complexity based on this level.
+DIFFICULTY LEVEL: {difficulty}
+Strictly follow these structural constraints based on the difficulty:
+- **Simple**: Focus on exactly two parties and one clear physical object of dispute. The moral choice should be straightforward, testing basic fairness.
+- **Moderate**: Introduce a third party or a conflicting cultural norm/local law. The dispute should involve secondary consequences or multiple valid points of view.
+- **Complex**: Involve systemic societal issues, multiple conflicting values (e.g., mercy vs. strict justice), and ambiguous facts where no single "perfect" answer exists. The decision should have long-term implications for the kingdom.
 
 In addition to the raw scenario, provide a version where important names, objects, and facts are wrapped in double asterisks for bold (Markdown: **like this**).
 

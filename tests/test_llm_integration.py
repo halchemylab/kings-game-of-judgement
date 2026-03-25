@@ -52,3 +52,10 @@ def test_analyze_judgment_with_llm_no_client():
         result = analyze_judgment_with_llm("j", "s", "p")
         assert "error" in result
         assert "not configured" in result["error"]
+
+def test_prompt_difficulty_constraints():
+    from llm_integration import SCENARIO_GENERATION_JSON_PROMPT_TEMPLATE
+    assert "Strictly follow these structural constraints" in SCENARIO_GENERATION_JSON_PROMPT_TEMPLATE
+    assert "**Simple**: Focus on exactly two parties" in SCENARIO_GENERATION_JSON_PROMPT_TEMPLATE
+    assert "**Moderate**: Introduce a third party" in SCENARIO_GENERATION_JSON_PROMPT_TEMPLATE
+    assert "**Complex**: Involve systemic societal issues" in SCENARIO_GENERATION_JSON_PROMPT_TEMPLATE
