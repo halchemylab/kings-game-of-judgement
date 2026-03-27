@@ -2,7 +2,7 @@
 import streamlit as st
 import os # For joining path in save_case success message
 import time
-from llm_integration import generate_scenario_with_llm, analyze_judgment_with_llm, OPENAI_API_KEY, highlight_important_parts_with_llm, highlight_important_parts_in_analysis_with_llm
+from llm_integration import generate_scenario_with_llm, analyze_judgment_with_llm, OPENAI_API_KEY, highlight_important_parts_with_llm, highlight_important_parts_in_analysis_with_llm, get_witness_response_with_llm
 from file_utils import save_case, generate_case_id, list_past_cases, load_case
 
 # --- Page Configuration ---
@@ -246,6 +246,14 @@ def init_session_state():
         st.session_state.game_stage = "welcome"
     if "current_scenario" not in st.session_state:
         st.session_state.current_scenario = None
+    if "characters" not in st.session_state:
+        st.session_state.characters = []
+    if "inquiry_history" not in st.session_state:
+        st.session_state.inquiry_history = []
+    if "questions_remaining" not in st.session_state:
+        st.session_state.questions_remaining = 3 # 3 questions per case
+    if "selected_witness" not in st.session_state:
+        st.session_state.selected_witness = None
     if "player_judgment" not in st.session_state:
         st.session_state.player_judgment = ""
     if "ai_analysis" not in st.session_state:
@@ -335,6 +343,10 @@ OPENAI_API_KEY=\"your_actual_api_key_here\"\n```
                 
                 def set_scenario(data):
                     st.session_state.current_scenario = data.get("highlighted_scenario", data.get("scenario", ""))
+                    st.session_state.characters = data.get("characters", [])
+                    st.session_state.inquiry_history = []
+                    st.session_state.questions_remaining = 3
+                    st.session_state.selected_witness = None
                 
                 if handle_llm_response(scenario_data, set_scenario, "Failed to generate scenario: "):
                     placeholder.empty()
@@ -355,6 +367,51 @@ def display_scenario_and_task():
             st.markdown(st.session_state.current_scenario)
             st.markdown('</section>', unsafe_allow_html=True)
             st.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
+
+            # --- Witness Inquiry Section ---
+            if st.session_state.characters:
+                st.markdown('<section class="royal-card" role="region" aria-label="Summon Witnesses"><span class="royal-label">📜 Summon the Witnesses:</span><br>'
+                            f'You may summon up to {st.session_state.questions_remaining} more witnesses or ask further questions.', unsafe_allow_html=True)
+                
+                cols = st.columns(len(st.session_state.characters))
+                for i, char in enumerate(st.session_state.characters):
+                    if cols[i].button(f"👤 {char}", key=f"char_{i}"):
+                        st.session_state.selected_witness = char
+                
+                if st.session_state.selected_witness:
+                    st.markdown(f"**Questioning: {st.session_state.selected_witness}**")
+                    if st.session_state.questions_remaining > 0:
+                        q_input = st.text_input("What is your question, Sire?", key="witness_q_input")
+                        if st.button("Ask Question", key="ask_q_btn"):
+                            if q_input:
+                                with st.spinner(f"{st.session_state.selected_witness} is preparing a response..."):
+                                    resp_data = get_witness_response_with_llm(
+                                        st.session_state.current_scenario,
+                                        st.session_state.selected_witness,
+                                        q_input
+                                    )
+                                if "response" in resp_data:
+                                    st.session_state.inquiry_history.append({
+                                        "character": st.session_state.selected_witness,
+                                        "question": q_input,
+                                        "response": resp_data["response"]
+                                    })
+                                    st.session_state.questions_remaining -= 1
+                                    st.rerun()
+                            else:
+                                st.warning("The King must speak his mind. Please enter a question.")
+                    else:
+                        st.info("You have exhausted your inquiries for this case.")
+
+                if st.session_state.inquiry_history:
+                    st.markdown("---")
+                    for entry in st.session_state.inquiry_history:
+                        st.markdown(f"**You asked {entry['character']}:** *{entry['question']}*")
+                        st.markdown(f"**{entry['character']} says:** {entry['response']}")
+                
+                st.markdown('</section>', unsafe_allow_html=True)
+                st.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
+
             st.markdown('<section class="royal-card" role="region" aria-label="Your Task"><span class="royal-label">Your Task, {}</span><br>'.format(st.session_state.judge_name) +
                 "Considering the facts, the written rules (if any were implied or provided in the scenario), "
                 "and the 'human values' and 'normative choices' at play:<br><ul>"
@@ -424,6 +481,7 @@ def display_ai_analysis():
                             st.session_state.current_scenario,
                             st.session_state.player_judgment,
                             st.session_state.ai_analysis,
+                            inquiry_history=st.session_state.inquiry_history,
                             case_path=case_path
                         ):
                             st.success(f"This case (ID: {st.session_state.current_case_id}) has been chronicled in the royal archives ({case_path}).")
@@ -488,6 +546,11 @@ def display_archives():
                     st.markdown('<section class="royal-card"><span class="royal-label">📜 The Case:</span><br>', unsafe_allow_html=True)
                     st.markdown(case_data["scenario"])
                     st.markdown('</section>', unsafe_allow_html=True)
+                    
+                    if case_data.get("inquiry"):
+                        st.markdown('<section class="royal-card"><span class="royal-label">🕵️ Investigation:</span><br>', unsafe_allow_html=True)
+                        st.markdown(case_data["inquiry"])
+                        st.markdown('</section>', unsafe_allow_html=True)
                     
                     st.markdown('<section class="royal-card"><span class="royal-label">⚖️ Judgment:</span><br>', unsafe_allow_html=True)
                     st.markdown(case_data["judgment"])

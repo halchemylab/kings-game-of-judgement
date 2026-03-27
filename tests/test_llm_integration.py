@@ -13,7 +13,8 @@ def test_generate_scenario_with_llm_success(mock_openai_client):
     mock_response = MagicMock()
     mock_response.choices[0].message.content = json.dumps({
         "scenario": "A dispute over a golden goose.",
-        "highlighted_scenario": "A dispute over a **golden goose**."
+        "highlighted_scenario": "A dispute over a **golden goose**.",
+        "characters": ["The Farmer", "The Merchant"]
     })
     mock_openai_client.chat.completions.create.return_value = mock_response
     
@@ -22,6 +23,8 @@ def test_generate_scenario_with_llm_success(mock_openai_client):
     
     assert "scenario" in result
     assert "highlighted_scenario" in result
+    assert "characters" in result
+    assert len(result["characters"]) == 2
     assert "**golden goose**" in result["highlighted_scenario"]
     from unittest.mock import ANY
     mock_openai_client.chat.completions.create.assert_called_once_with(
@@ -33,6 +36,32 @@ def test_generate_scenario_with_llm_success(mock_openai_client):
         response_format={"type": "json_object"},
         temperature=0.8,
         max_tokens=1000
+    )
+
+def test_get_witness_response_with_llm_success(mock_openai_client):
+    from llm_integration import get_witness_response_with_llm, CHEAP_MODEL_TO_USE
+    # Mock successful JSON response
+    mock_response = MagicMock()
+    mock_response.choices[0].message.content = json.dumps({
+        "response": "I saw the merchant take the goose, Sire!"
+    })
+    mock_openai_client.chat.completions.create.return_value = mock_response
+    
+    result = get_witness_response_with_llm("A dispute over a golden goose.", "The Farmer", "What did you see?")
+    
+    assert "response" in result
+    assert "merchant take the goose" in result["response"]
+    
+    from unittest.mock import ANY
+    mock_openai_client.chat.completions.create.assert_called_once_with(
+        model=CHEAP_MODEL_TO_USE,
+        messages=[
+            {"role": "system", "content": "You are a character in a medieval kingdom. Respond ONLY with a JSON object containing 'response'."},
+            {"role": "user", "content": ANY}
+        ],
+        response_format={"type": "json_object"},
+        temperature=0.7,
+        max_tokens=500
     )
 
 def test_generate_scenario_with_llm_error(mock_openai_client):

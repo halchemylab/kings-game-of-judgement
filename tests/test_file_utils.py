@@ -21,8 +21,9 @@ def test_save_case(temp_case_dir):
     scenario = "A test scenario."
     judgment = "A test judgment."
     analysis = "A test analysis."
+    inquiry_history = [{"character": "Farmer", "question": "Why?", "response": "Because."}]
     
-    success = save_case(case_id, player_name, scenario, judgment, analysis)
+    success = save_case(case_id, player_name, scenario, judgment, analysis, inquiry_history=inquiry_history)
     
     assert success is True
     
@@ -32,6 +33,9 @@ def test_save_case(temp_case_dir):
     content = case_file.read_text(encoding="utf-8")
     assert f"Case ID: {case_id}" in content
     assert f"--- JUDGMENT BY JUDGE {player_name} ---" in content
+    assert "--- INQUIRY TRANSCRIPT ---" in content
+    assert "To Farmer: Why?" in content
+    assert "Response: Because." in content
     assert scenario in content
 
 def test_load_case(temp_case_dir):
@@ -41,8 +45,9 @@ def test_load_case(temp_case_dir):
     scenario = "The case of the missing cake."
     judgment = "The baker is innocent."
     analysis = "A fair ruling indeed."
+    inquiry_history = [{"character": "Baker", "question": "Did you?", "response": "No."}]
     
-    save_case(case_id, player_name, scenario, judgment, analysis)
+    save_case(case_id, player_name, scenario, judgment, analysis, inquiry_history=inquiry_history)
     
     loaded_data = load_case(f"case_{case_id}.txt")
     
@@ -52,6 +57,8 @@ def test_load_case(temp_case_dir):
     assert loaded_data["scenario"] == scenario
     assert loaded_data["judgment"] == judgment
     assert loaded_data["analysis"] == analysis
+    assert "To Baker: Did you?" in loaded_data["inquiry"]
+    assert "Response: No." in loaded_data["inquiry"]
 
 def test_list_past_cases(temp_case_dir):
     # Initially empty

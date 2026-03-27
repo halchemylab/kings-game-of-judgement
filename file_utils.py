@@ -19,7 +19,7 @@ def ensure_past_cases_dir_exists():
             return False
     return True
 
-def save_case(case_id, player_name, scenario, judgment, analysis, case_path=None):
+def save_case(case_id, player_name, scenario, judgment, analysis, inquiry_history=None, case_path=None):
     """Saves a completed case to a text file. Uses a safe path if provided."""
     if not ensure_past_cases_dir_exists():
         return False
@@ -33,6 +33,13 @@ def save_case(case_id, player_name, scenario, judgment, analysis, case_path=None
     content += f"Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
     content += "--- SCENARIO ---\n"
     content += scenario + "\n\n"
+    
+    if inquiry_history:
+        content += "--- INQUIRY TRANSCRIPT ---\n"
+        for entry in inquiry_history:
+            content += f"To {entry['character']}: {entry['question']}\n"
+            content += f"Response: {entry['response']}\n\n"
+    
     content += f"--- JUDGMENT BY JUDGE {player_name} ---\n"
     content += judgment + "\n\n"
     content += "--- ADVISOR'S ANALYSIS ---\n"
@@ -68,11 +75,13 @@ def load_case(filename):
 
         # Extract sections using delimiters
         # We look for text between the markers
-        scenario_match = re.search(r"--- SCENARIO ---\n(.*?)\n\n--- JUDGMENT", content, re.DOTALL)
+        scenario_match = re.search(r"--- SCENARIO ---\n(.*?)\n\n--- (?:INQUIRY|JUDGMENT)", content, re.DOTALL)
+        inquiry_match = re.search(r"--- INQUIRY TRANSCRIPT ---\n(.*?)\n\n--- JUDGMENT", content, re.DOTALL)
         judgment_match = re.search(r"--- JUDGMENT BY JUDGE (.*?) ---\n(.*?)\n\n--- ADVISOR'S ANALYSIS", content, re.DOTALL)
         analysis_match = re.search(r"--- ADVISOR'S ANALYSIS ---\n(.*?)\n----------------------------------------", content, re.DOTALL)
 
         case_data['scenario'] = scenario_match.group(1).strip() if scenario_match else ""
+        case_data['inquiry'] = inquiry_match.group(1).strip() if inquiry_match else None
         if judgment_match:
             case_data['player_name'] = judgment_match.group(1).strip()
             case_data['judgment'] = judgment_match.group(2).strip()

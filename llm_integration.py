@@ -41,6 +41,27 @@ In addition to the raw scenario, provide a version where important names, object
 Return your response as a JSON object with the following keys:
 - "scenario": The raw text of the scenario.
 - "highlighted_scenario": The scenario text with key parts bolded using Markdown.
+- "characters": A list of 2-3 key characters involved in the dispute (e.g., ["The Accused Merchant", "The Royal Guard"]).
+"""
+
+# Prompt for Witness Roleplay (JSON)
+WITNESS_ROLEPLAY_PROMPT_TEMPLATE = """
+You are performing as a character in "The King's Game of Judgement."
+The player (The King/Judge) is asking you a question to help them reach a decision.
+
+Scenario: {scenario_details}
+Your Character: {character_name}
+The King's Question: {question}
+
+Guidelines:
+1. Stay strictly in character. Use a thematic tone (e.g., humble, defensive, or wise).
+2. Do not reveal facts outside of what is mentioned or strongly implied in the scenario.
+3. If the question asks for something you wouldn't know, respond naturally as the character (e.g., "I saw nothing of the sort, Sire!").
+4. Keep the response concise (2-3 sentences).
+5. Do not give the "correct" answer to the case; only provide your perspective or "testimony."
+
+Return your response as a JSON object with the following key:
+- "response": The character's spoken response to the King.
 """
 
 # Prompt for Judgment Analysis (JSON)
@@ -126,6 +147,37 @@ def analyze_judgment_with_llm(player_judgment, scenario_details, player_name):
     except Exception as e:
         print(f"Error during judgment analysis: {e}")
         return {"error": str(e)}
+
+
+def get_witness_response_with_llm(scenario, character, question, model=CHEAP_MODEL_TO_USE):
+    """
+    Simulates a witness or character response based on the scenario and a player's question.
+    """
+    if not client:
+        return {"error": "OpenAI API key not configured."}
+
+    prompt = WITNESS_ROLEPLAY_PROMPT_TEMPLATE.format(
+        scenario_details=scenario,
+        character_name=character,
+        question=question
+    )
+
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": "You are a character in a medieval kingdom. Respond ONLY with a JSON object containing 'response'."},
+                {"role": "user", "content": prompt}
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.7,
+            max_tokens=500
+        )
+        return json.loads(response.choices[0].message.content)
+    except Exception as e:
+        print(f"Error during witness response: {e}")
+        return {"error": str(e)}
+
 
 # Deprecated functions kept for compatibility if needed, but updated to use new logic internally or return errors.
 def highlight_important_parts_with_llm(scenario_text):
