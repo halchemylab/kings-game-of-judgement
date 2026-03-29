@@ -1,15 +1,15 @@
 # The King's Game of Judgement
 
-A text-based, interactive ethical and legal dilemma game powered by OpenAI's GPT-4o and Streamlit.
+A text-based, interactive ethical and legal dilemma game powered by OpenAI's GPT-5.4 and Streamlit.
 
 ## Overview
 
-**The King's Game of Judgement** places you in the role of a wise judge in a fantastical kingdom. You will be presented with unique, AI-generated cases involving disputes, moral quandaries, and legal dilemmas. After rendering your judgment, a Royal Advisor (powered by GPT-4o) provides thoughtful, supportive analysis of your decision.
+**The King's Game of Judgement** places you in the role of a wise judge in a fantastical kingdom. You will be presented with unique, AI-generated cases involving disputes, moral quandaries, and legal dilemmas. After rendering your judgment, a Royal Advisor (powered by GPT-5.4 with enhanced reasoning) provides thoughtful, supportive analysis of your decision.
 
 ## Features
-- **AI-Generated Scenarios:** Each case is crafted by GPT-4o, with adjustable difficulty (Simple, Moderate, Complex).
+- **AI-Generated Scenarios:** Each case is crafted by GPT-5.4-mini, with adjustable difficulty (Simple, Moderate, Complex).
 - **Interactive Judging:** Enter your judgment and reasoning for each scenario.
-- **Royal Advisor Feedback:** Receive detailed, encouraging analysis of your decisions from the AI.
+- **Royal Advisor Feedback:** Receive detailed, encouraging analysis of your decisions from the AI, utilizing advanced reasoning effort for deeper moral insights.
 - **Case Archiving:** All resolved cases are saved locally for review in the `past_cases/` folder.
 - **Modern, Accessible UI:** Built with Streamlit, featuring custom CSS for a legible, responsive, and accessible interface.
 - **Input Sanitization:** All user input is sanitized to prevent code/HTML/script injection.
@@ -73,7 +73,7 @@ The app will open in your browser. Enter your name, select a difficulty, and beg
 - **API Key Errors:**
   - Ensure `.env` is in the project root and contains `OPENAI_API_KEY=...` (no quotes).
   - Restart the app after editing `.env`.
-  - Your key must be active and have GPT-4o access.
+  - Your key must be active and have GPT-5.4 access.
 - **No Scenarios/Analysis:**
   - Check your internet connection.
   - Review the Streamlit logs for error messages.

@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-MODEL_TO_USE = os.getenv("OPENAI_MODEL", "gpt-4o")
-CHEAP_MODEL_TO_USE = os.getenv("OPENAI_CHEAP_MODEL", "gpt-4o-mini")
+MODEL_TO_USE = os.getenv("OPENAI_MODEL", "gpt-5.4")
+CHEAP_MODEL_TO_USE = os.getenv("OPENAI_CHEAP_MODEL", "gpt-5.4-mini")
 
 # Initialize OpenAI client globally if API key is available
 if OPENAI_API_KEY:
@@ -81,6 +81,8 @@ Analysis Guidelines:
 6. Provide gentle alternative perspectives if applicable.
 7. Reinforce strengths and maintain a kingly, supportive tone.
 
+THOUGHT PROCESS: Use your internal reasoning to identify any subtle nuances or underlying ethical conflicts that the player may have addressed or missed.
+
 In addition to the raw analysis, provide a version where important names, values, and conclusions are wrapped in double asterisks for bold (Markdown: **like this**).
 
 Return your response as a JSON object with the following keys:
@@ -122,6 +124,7 @@ def generate_scenario_with_llm(player_name, difficulty="Moderate", model=CHEAP_M
 def analyze_judgment_with_llm(player_judgment, scenario_details, player_name):
     """
     Analyzes the player's judgment (raw and highlighted) in a single LLM call.
+    Uses the flagship model with reasoning effort for high-quality feedback.
     """
     if not client:
         return {"error": "OpenAI API key not configured."}
@@ -141,7 +144,8 @@ def analyze_judgment_with_llm(player_judgment, scenario_details, player_name):
             ],
             response_format={"type": "json_object"},
             temperature=0.7,
-            max_tokens=1200
+            max_tokens=1500,
+            reasoning_effort="medium" # New for GPT-5.4
         )
         return json.loads(response.choices[0].message.content)
     except Exception as e:
