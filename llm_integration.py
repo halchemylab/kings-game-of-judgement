@@ -113,7 +113,7 @@ def generate_scenario_with_llm(player_name, difficulty="Moderate", model=CHEAP_M
             ],
             response_format={"type": "json_object"},
             temperature=0.8,
-            max_tokens=1000
+            max_completion_tokens=1000
         )
         return json.loads(response.choices[0].message.content)
     except Exception as e:
@@ -144,7 +144,7 @@ def analyze_judgment_with_llm(player_judgment, scenario_details, player_name):
             ],
             response_format={"type": "json_object"},
             temperature=0.7,
-            max_tokens=1500,
+            max_completion_tokens=1500,
             reasoning_effort="medium" # New for GPT-5.4
         )
         return json.loads(response.choices[0].message.content)
@@ -175,7 +175,7 @@ def get_witness_response_with_llm(scenario, character, question, model=CHEAP_MOD
             ],
             response_format={"type": "json_object"},
             temperature=0.7,
-            max_tokens=500
+            max_completion_tokens=500
         )
         return json.loads(response.choices[0].message.content)
     except Exception as e:

@@ -35,7 +35,7 @@ def test_generate_scenario_with_llm_success(mock_openai_client):
         ],
         response_format={"type": "json_object"},
         temperature=0.8,
-        max_tokens=1000
+        max_completion_tokens=1000
     )
 
 def test_get_witness_response_with_llm_success(mock_openai_client):
@@ -61,7 +61,7 @@ def test_get_witness_response_with_llm_success(mock_openai_client):
         ],
         response_format={"type": "json_object"},
         temperature=0.7,
-        max_tokens=500
+        max_completion_tokens=500
     )
 
 def test_generate_scenario_with_llm_error(mock_openai_client):
@@ -99,7 +99,8 @@ def test_analyze_judgment_with_llm_success(mock_openai_client):
         ],
         response_format={"type": "json_object"},
         temperature=0.7,
-        max_tokens=1200
+        max_completion_tokens=1500,
+        reasoning_effort="medium"
     )
 
 def test_analyze_judgment_with_llm_no_client():
