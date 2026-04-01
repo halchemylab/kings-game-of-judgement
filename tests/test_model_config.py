@@ -13,8 +13,7 @@ def test_default_model():
             
         import llm_integration
         importlib.reload(llm_integration)
-        assert llm_integration.MODEL_TO_USE == "gpt-4o"
-
+        assert llm_integration.MODEL_TO_USE == "gpt-5.4"
 def test_custom_model():
     """Test that the model can be configured via OPENAI_MODEL."""
     with mock.patch.dict(os.environ, {"OPENAI_MODEL": "gpt-3.5-turbo"}):

@@ -4,12 +4,18 @@ import time
 from ui.styles import sanitize_input
 from llm_integration import generate_scenario_with_llm, OPENAI_API_KEY
 from file_utils import generate_case_id
+from models import Scenario
 
 def handle_llm_response(response, success_callback, error_message_prefix=""):
+    if isinstance(response, Scenario):
+        success_callback(response)
+        return True
+    
     if isinstance(response, dict):
         if "error" in response:
             st.error(f"{error_message_prefix}{response['error']}")
             return False
+        # If it's a dict but not an error, we might still want to handle it (though llm_integration should return models now)
         success_callback(response)
         return True
     
@@ -73,8 +79,12 @@ OPENAI_API_KEY=\"your_actual_api_key_here\"\n```
                     scenario_data = generate_scenario_with_llm(st.session_state.player_name, st.session_state.difficulty)
                 
                 def set_scenario(data):
-                    st.session_state.current_scenario = data.get("highlighted_scenario", data.get("scenario", ""))
-                    st.session_state.characters = data.get("characters", [])
+                    if isinstance(data, Scenario):
+                        st.session_state.current_scenario = data.highlighted_scenario
+                        st.session_state.characters = data.characters
+                    else:
+                        st.session_state.current_scenario = data.get("highlighted_scenario", data.get("scenario", ""))
+                        st.session_state.characters = data.get("characters", [])
                     st.session_state.inquiry_history = []
                     st.session_state.questions_remaining = 3
                     st.session_state.selected_witness = None

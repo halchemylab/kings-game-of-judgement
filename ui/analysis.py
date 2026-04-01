@@ -5,12 +5,7 @@ import os
 from llm_integration import analyze_judgment_with_llm
 from file_utils import save_case
 from ui.welcome import handle_llm_response
-
-def safe_case_filename(case_id):
-    """Generate a safe filename for a case, preventing path traversal."""
-    import re
-    safe_id = re.sub(r'[^\w\-]', '', str(case_id))
-    return os.path.join('past_cases', f'case_{safe_id}.txt')
+from models import Analysis, CaseRecord
 
 def display_ai_analysis():
     placeholder = st.empty()
@@ -26,7 +21,10 @@ def display_ai_analysis():
                 )
             
             def set_analysis(data):
-                st.session_state.ai_analysis = data.get("highlighted_analysis", data.get("analysis", ""))
+                if isinstance(data, Analysis):
+                    st.session_state.ai_analysis = data.highlighted_analysis
+                else:
+                    st.session_state.ai_analysis = data.get("highlighted_analysis", data.get("analysis", ""))
             
             if not handle_llm_response(analysis_data, set_analysis, "Failed to get Advisor's analysis: "):
                 if st.button("Try Analysis Again", key="try_analysis_btn"):
@@ -40,21 +38,22 @@ def display_ai_analysis():
             st.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
             if st.session_state.current_case_id and st.session_state.current_scenario and st.session_state.player_judgment and st.session_state.ai_analysis:
                 if not st.session_state.ai_analysis.startswith("Error:"):
-                    case_path = safe_case_filename(st.session_state.current_case_id)
                     try:
-                        if save_case(
-                            st.session_state.current_case_id,
-                            st.session_state.player_name,
-                            st.session_state.current_scenario,
-                            st.session_state.player_judgment,
-                            st.session_state.ai_analysis,
+                        case_record = CaseRecord(
+                            case_id=st.session_state.current_case_id,
+                            player_name=st.session_state.player_name,
+                            difficulty=st.session_state.difficulty,
+                            scenario=st.session_state.current_scenario,
                             inquiry_history=st.session_state.inquiry_history,
-                            case_path=case_path
-                        ):
-                            st.success(f"This case (ID: {st.session_state.current_case_id}) has been chronicled in the royal archives ({case_path}).")
+                            judgment=st.session_state.player_judgment,
+                            analysis=st.session_state.ai_analysis
+                        )
+                        if save_case(case_record):
+                            st.success(f"This case (ID: {st.session_state.current_case_id}) has been chronicled in the royal archives.")
                         else:
                             st.error("There was an issue archiving this case.")
                     except Exception as e:
+                        print(f"Error creating CaseRecord or saving: {e}")
                         st.error("There was a secure file handling error while archiving this case.")
                 else:
                     st.info("Case not saved as the AI analysis encountered an error.")

@@ -1,7 +1,9 @@
 # llm_integration.py
 import os
 import openai
+import json
 from dotenv import load_dotenv
+from models import Scenario, Analysis, WitnessResponse
 
 # Load environment variables from .env file
 load_dotenv()
@@ -93,8 +95,6 @@ Return your response as a JSON object with the following keys:
 
 # --- LLM API FUNCTIONS ---
 
-import json
-
 def generate_scenario_with_llm(player_name, difficulty="Moderate", model=CHEAP_MODEL_TO_USE):
     """
     Generates a structured scenario (raw and highlighted) in a single LLM call.
@@ -108,14 +108,14 @@ def generate_scenario_with_llm(player_name, difficulty="Moderate", model=CHEAP_M
         response = client.chat.completions.create(
             model=model,
             messages=[
-                {"role": "system", "content": "You are a master storyteller. Respond ONLY with a JSON object containing 'scenario' and 'highlighted_scenario'."},
+                {"role": "system", "content": "You are a master storyteller. Respond ONLY with a JSON object matching the requested schema."},
                 {"role": "user", "content": prompt}
             ],
             response_format={"type": "json_object"},
             temperature=0.8,
             max_completion_tokens=1000
         )
-        return json.loads(response.choices[0].message.content)
+        return Scenario.model_validate_json(response.choices[0].message.content)
     except Exception as e:
         print(f"Error during scenario generation: {e}")
         return {"error": str(e)}
@@ -139,7 +139,7 @@ def analyze_judgment_with_llm(player_judgment, scenario_details, player_name):
         response = client.chat.completions.create(
             model=MODEL_TO_USE,
             messages=[
-                {"role": "system", "content": "You are a supportive Royal Advisor. Respond ONLY with a JSON object containing 'thought_process', 'analysis', and 'highlighted_analysis'."},
+                {"role": "system", "content": "You are a supportive Royal Advisor. Respond ONLY with a JSON object matching the requested schema."},
                 {"role": "user", "content": prompt}
             ],
             response_format={"type": "json_object"},
@@ -147,7 +147,7 @@ def analyze_judgment_with_llm(player_judgment, scenario_details, player_name):
             max_completion_tokens=1500,
             reasoning_effort="medium" # New for GPT-5.4
         )
-        return json.loads(response.choices[0].message.content)
+        return Analysis.model_validate_json(response.choices[0].message.content)
     except Exception as e:
         print(f"Error during judgment analysis: {e}")
         return {"error": str(e)}
@@ -170,14 +170,14 @@ def get_witness_response_with_llm(scenario, character, question, model=CHEAP_MOD
         response = client.chat.completions.create(
             model=model,
             messages=[
-                {"role": "system", "content": "You are a character in a medieval kingdom. Respond ONLY with a JSON object containing 'response'."},
+                {"role": "system", "content": "You are a character in a medieval kingdom. Respond ONLY with a JSON object matching the requested schema."},
                 {"role": "user", "content": prompt}
             ],
             response_format={"type": "json_object"},
             temperature=0.7,
             max_completion_tokens=500
         )
-        return json.loads(response.choices[0].message.content)
+        return WitnessResponse.model_validate_json(response.choices[0].message.content)
     except Exception as e:
         print(f"Error during witness response: {e}")
         return {"error": str(e)}

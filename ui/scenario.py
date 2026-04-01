@@ -3,6 +3,7 @@ import streamlit as st
 import time
 from ui.styles import sanitize_input
 from llm_integration import get_witness_response_with_llm
+from models import WitnessResponse, InquiryEntry
 
 def display_scenario_and_task():
     placeholder = st.empty()
@@ -36,12 +37,19 @@ def display_scenario_and_task():
                                         st.session_state.selected_witness,
                                         q_input
                                     )
-                                if "response" in resp_data:
-                                    st.session_state.inquiry_history.append({
-                                        "character": st.session_state.selected_witness,
-                                        "question": q_input,
-                                        "response": resp_data["response"]
-                                    })
+                                
+                                response_text = ""
+                                if isinstance(resp_data, WitnessResponse):
+                                    response_text = resp_data.response
+                                elif isinstance(resp_data, dict) and "response" in resp_data:
+                                    response_text = resp_data["response"]
+                                
+                                if response_text:
+                                    st.session_state.inquiry_history.append(InquiryEntry(
+                                        character=st.session_state.selected_witness,
+                                        question=q_input,
+                                        response=response_text
+                                    ))
                                     st.session_state.questions_remaining -= 1
                                     st.rerun()
                             else:
@@ -52,8 +60,13 @@ def display_scenario_and_task():
                 if st.session_state.inquiry_history:
                     st.markdown("---")
                     for entry in st.session_state.inquiry_history:
-                        st.markdown(f"**You asked {entry['character']}:** *{entry['question']}*")
-                        st.markdown(f"**{entry['character']} says:** {entry['response']}")
+                        # Handle both models and legacy dicts (though new should be models)
+                        if isinstance(entry, InquiryEntry):
+                            st.markdown(f"**You asked {entry.character}:** *{entry.question}*")
+                            st.markdown(f"**{entry.character} says:** {entry.response}")
+                        else:
+                            st.markdown(f"**You asked {entry['character']}:** *{entry['question']}*")
+                            st.markdown(f"**{entry['character']} says:** {entry['response']}")
                 
                 st.markdown('</section>', unsafe_allow_html=True)
                 st.markdown('<hr class="royal-divider" />', unsafe_allow_html=True)
