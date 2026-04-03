@@ -42,11 +42,11 @@ A text-based, interactive ethical and legal dilemma game powered by OpenAI's GPT
    pip install -r requirements.txt
    ```
 3. **Set up your environment variables:**
-   - Create a `.env` file in the project root:
-     ```env
-     OPENAI_API_KEY=your_openai_api_key_here
-     OPENAI_MODEL=gpt-4o  # Optional: Defaults to gpt-4o if omitted
+   - Copy the example environment file:
+     ```sh
+     cp .env.example .env
      ```
+   - Open `.env` and enter your `OPENAI_API_KEY`.
    - Do **not** use quotes around the API key.
 
 ### Running the App
