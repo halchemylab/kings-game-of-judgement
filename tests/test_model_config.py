@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 
 def test_default_model():
-    """Test that the default model is gpt-4o when OPENAI_MODEL is not set."""
+    """Test that the default model is gpt-5.4 when OPENAI_MODEL is not set."""
     # Patch environment without clearing it completely to preserve PATH
     with mock.patch.dict(os.environ):
         # Remove OPENAI_MODEL if it exists to test default behavior

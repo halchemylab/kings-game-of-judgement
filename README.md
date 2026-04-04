@@ -67,7 +67,7 @@ The app will open in your browser. Enter your name, select a difficulty, and beg
 
 ## Environment Variables
 - `OPENAI_API_KEY` — Your OpenAI API key (required)
-- `OPENAI_MODEL` — The OpenAI model to use (optional, defaults to `gpt-4o`)
+- `OPENAI_MODEL` — The OpenAI model to use (optional, defaults to `gpt-5.4`)
 
 ## Troubleshooting
 - **API Key Errors:**
