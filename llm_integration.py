@@ -53,7 +53,9 @@ The player (The King/Judge) is asking you a question to help them reach a decisi
 
 Scenario: {scenario_details}
 Your Character: {character_name}
-The King's Question: {question}
+
+{history}
+The King's Current Question: {question}
 
 Guidelines:
 1. Stay strictly in character. Use a thematic tone (e.g., humble, defensive, or wise).
@@ -61,6 +63,7 @@ Guidelines:
 3. If the question asks for something you wouldn't know, respond naturally as the character (e.g., "I saw nothing of the sort, Sire!").
 4. Keep the response concise (2-3 sentences).
 5. Do not give the "correct" answer to the case; only provide your perspective or "testimony."
+6. Remember and acknowledge previous questions and answers in this conversation history, if any.
 
 Return your response as a JSON object with the following key:
 - "response": The character's spoken response to the King.
@@ -153,17 +156,31 @@ def analyze_judgment_with_llm(player_judgment, scenario_details, player_name):
         return {"error": str(e)}
 
 
-def get_witness_response_with_llm(scenario, character, question, model=CHEAP_MODEL_TO_USE):
+def get_witness_response_with_llm(scenario, character, question, history=None, model=CHEAP_MODEL_TO_USE):
     """
     Simulates a witness or character response based on the scenario and a player's question.
+    Incorporates previous conversation history with the same character if provided.
     """
     if not client:
         return {"error": "OpenAI API key not configured."}
 
+    history_text = ""
+    if history:
+        # Filter history to only include previous interactions with this specific character
+        relevant_history = [h for h in history if h.character == character]
+        if relevant_history:
+            history_text = "Previous Conversation History with this Character:\n"
+            for h in relevant_history:
+                # Handle both models and legacy dicts
+                q = h.question if hasattr(h, 'question') else h.get('question', '')
+                r = h.response if hasattr(h, 'response') else h.get('response', '')
+                history_text += f"- The King asked: {q}\n- Your previous response: {r}\n"
+
     prompt = WITNESS_ROLEPLAY_PROMPT_TEMPLATE.format(
         scenario_details=scenario,
         character_name=character,
-        question=question
+        question=question,
+        history=history_text
     )
 
     try:

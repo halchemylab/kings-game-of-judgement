@@ -35,7 +35,8 @@ def display_scenario_and_task():
                                     resp_data = get_witness_response_with_llm(
                                         st.session_state.current_scenario,
                                         st.session_state.selected_witness,
-                                        q_input
+                                        q_input,
+                                        history=st.session_state.inquiry_history
                                     )
                                 
                                 response_text = ""
